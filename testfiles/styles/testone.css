@@ -1,0 +1,14 @@
+html, body, #drawing {
+    margin: 0 auto;
+    height: 90%;
+    width: 90%;
+}
+
+form {
+  border: solid #aaa 1px;
+  padding: 1em;
+}
+
+#admin-form {
+  display: none;
+}

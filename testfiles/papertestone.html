@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SVG.js Test 1</title>
+  <link rel="stylesheet" href="styles/testone.css">
+</head>
+<body>
+  <div id="admin-settings">
+    <h2>Admin Settings</h2>
+    <a href="javascript:void(0)" id="admin-form-link" class="closed">Show Form</a>
+    <form action="#" id="admin-form">
+      Material Thickness:  <input type="number" id="material-thickness" value="0.22" step="any" name="thickness" min="0"> inches
+      <br>
+      Overlap joint clearance:  <input type="number" id="overlap-clearance" value="0.22" step="any" name="overlap-clearance" min="0"> inches
+      <br>
+      Kerf clearance:  <input type="number" id="kerf-clearance" value="0.22" step="any" name="kerf-clearance" min="0"> inches
+      <br>
+      Grid units:  <input type="number" id="grid-units" value="0.22" step="any" name="grid-units" min="0"> inches
+      <br>
+      <h3>Max drawer dimensions</h3>
+      height:  <input type="number" id="max-height" value="0.22" step="any" name="max-height" min="0"> inches, width:  <input type="number" id="max-width" value="0.22" step="any" name="max-width" min="0"> inches, depth:  <input type="number" id="max-depth" value="0.22" step="any" name="max-depth" min="0"> inches
+      <br>
+      <h3>Min drawer dimensions</h3>
+      height:  <input type="number" id="min-height" value="0.22" step="any" name="min-height" min="0"> inches, width:  <input type="number" id="min-width" value="0.22" step="any" name="min-width" min="0"> inches, depth:  <input type="number" id="min-depth" value="0.22" step="any" name="min-depth" min="0"> inches
+      <br>
+      Min segment length:  <input type="number" id="min-segment-length" value="0.22" step="any" name="min-segment-length" min="0"> inches
+      <br>
+      <button type="submit" id="submit-btn">Submit</button>
+    </form>
+  </div>
+  <div id="user-settings">
+    <h2>User Settings</h2>
+    <form action="#" id="user-form">
+      <h3>Drawer Size</h3>
+      height:  <input type="number" id="drawer-height" value="4" step="any" name="drawer-height" min="0.5"> inches, width:  <input type="number" id="drawer-width" value="16.5" step="any" name="drawer-width" min="1"> inches, depth:  <input type="number" id="drawer-depth" value="22.5" step="any" name="drawer-depth" min="1"> inches
+      <!-- <br>
+      <button type="submit" id="submit-btn">Submit</button> -->
+    </form>
+  </div>
+  <div id="drawing-tools">
+    Draw Vertical Line: <button id="vertical-line">|</button>
+  </div>
+  <div id="drawing"></div>
+
+  <script src="js/contrib/svg.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.clock.js"></script>
+  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.draggable.js"></script>
+  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.import.js"></script>
+  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.filter.js"></script>
+  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.export.js"></script>
+  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.easing.js"></script>
+  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.shapes.js"></script>
+  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.topath.js"></script>
+  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.parser.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="js/custom/testone.js"></script>
+</body>
+</html>
