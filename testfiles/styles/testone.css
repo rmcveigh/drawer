@@ -12,3 +12,11 @@ form {
 #admin-form {
   display: none;
 }
+
+#templates li{
+  display: inline;
+}
+.template-image {
+  max-width: 24%;
+  height: auto;
+}

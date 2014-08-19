@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>SVG.js Test 1</title>
+  <title>Snap.svg Test 1</title>
   <link rel="stylesheet" href="styles/testone.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="../dist/snap.svg-min.js"></script>
 </head>
 <body>
   <div id="admin-settings">
@@ -33,27 +35,39 @@
     <h2>User Settings</h2>
     <form action="#" id="user-form">
       <h3>Drawer Size</h3>
-      height:  <input type="number" id="drawer-height" value="4" step="any" name="drawer-height" min="0.5"> inches, width:  <input type="number" id="drawer-width" value="16.5" step="any" name="drawer-width" min="1"> inches, depth:  <input type="number" id="drawer-depth" value="22.5" step="any" name="drawer-depth" min="1"> inches
-      <!-- <br>
-      <button type="submit" id="submit-btn">Submit</button> -->
+      height:  <input type="number" id="drawer-height" value="4" step="any" name="drawer-height" min="0.5"> inches, width:  <input type="number" id="drawer-width" value="11.0" step="any" name="drawer-width" min="1"> inches, depth:  <input type="number" id="drawer-depth" value="12.5" step="any" name="drawer-depth" min="1"> inches
+      <br>
+      <button type="submit" id="submit-btn">Submit</button>
     </form>
   </div>
-  <div id="drawing-tools">
-    Draw Vertical Line: <button id="vertical-line">|</button>
-  </div>
-  <div id="drawing"></div>
 
-  <script src="js/contrib/svg.min.js" type="text/javascript" charset="utf-8"></script>
-  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.clock.js"></script>
-  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.draggable.js"></script>
-  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.import.js"></script>
-  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.filter.js"></script>
-  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.export.js"></script>
-  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.easing.js"></script>
-  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.shapes.js"></script>
-  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.topath.js"></script>
-  <script src="https://s3-eu-west-1.amazonaws.com/svgjs/svg.parser.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <div id="templates">
+    <h3>Templates</h3>
+    <ul>
+      <li>
+        <a href="javascript:void(0)" id="item1" class="template-image-link"><img class="template-image" src="images/KCupCoffeeSuppliesAssy.JPG"></a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" id="item2" class="template-image-link"><img class="template-image" src="images/KCupCoffeeSuppliesAssy.JPG"></a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" id="item3" class="template-image-link"><img class="template-image" src="images/KCupCoffeeSuppliesAssy.JPG"></a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" id="item4" class="template-image-link"><img class="template-image" src="images/KCupCoffeeSuppliesAssy.JPG"></a>
+      </li>
+    </ul>
+  </div>
+
+  <div id="drawing-tools">
+    <h3>Tools</h3>
+    Draw Horizontal Line: <button id="horizontal-line">-</button>
+    Draw Vertical Line: <button id="vertical-line">|</button>
+    <a class="btn btn-blue" id="clear-btn" href="javascript:void(0)">Clear All</a>
+  </div>
+  <div id="svg-drawing">
+    <svg id="drawing"></svg>
+  </div>
   <script src="js/custom/testone.js"></script>
 </body>
 </html>
