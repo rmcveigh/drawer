@@ -45,8 +45,49 @@
     }
   });
 
+//create canvas
   var svgElement = document.getElementById("drawing");
   var s = Snap(svgElement);
+  s.attr({ viewBox: "0 0 "+canvasWidth100 +" "+ canvasHeight100});
+
+//drag limitor plugin
+  (function() {
+
+    Snap.plugin( function( Snap, Element, Paper, global ) {
+
+      Element.prototype.limitDrag = function( params ) {
+        this.data('minx', params.minx ); this.data('miny', params.miny );
+        this.data('maxx', params.maxx ); this.data('maxy', params.maxy );
+        this.data('x', params.x );    this.data('y', params.y );
+        this.data('ibb', this.getBBox() );
+        this.data('ot', this.transform().local );
+        this.drag( limitMoveDrag, limitStartDrag );
+        return this;
+      };
+
+      function limitMoveDrag( dx, dy ) {
+        var tdx, tdy;
+        var sInvMatrix = this.transform().globalMatrix.invert();
+            sInvMatrix.e = sInvMatrix.f = 0;
+            tdx = sInvMatrix.x( dx,dy ); tdy = sInvMatrix.y( dx,dy );
+
+        this.data('x', +this.data('ox') + tdx);
+        this.data('y', +this.data('oy') + tdy);
+        if( this.data('x') > this.data('maxx') - this.data('ibb').width  )
+          { this.data('x', this.data('maxx') - this.data('ibb').width  ) };
+        if( this.data('y') > this.data('maxy') - this.data('ibb').height )
+          { this.data('y', this.data('maxy') - this.data('ibb').height ) };
+        if( this.data('x') < this.data('minx') ) { this.data('x', this.data('minx') ) };
+              if( this.data('y') < this.data('miny') ) { this.data('y', this.data('miny') ) };
+        this.transform( this.data('ot') + "t" + [ this.data('x'), this.data('y') ]  );
+      };
+
+      function limitStartDrag( x, y, ev ) {
+        this.data('ox', this.data('x')); this.data('oy', this.data('y'));
+      };
+    });
+  })();
+
 
   $('#clear-btn').click(function(event) {
     event.preventDefault();
@@ -70,7 +111,6 @@
           y1 = (path.y1)*currentDrawerDepth100,
           x2 = (path.x2)*currentDrawerWidth100,
           y2 = (path.y2)*currentDrawerDepth100;
-        console.log(x1+', '+y1+', '+x2+', '+y2);
         var p = s.path(
           "M "+x1+" "+y1+" L " +x2+ " "+y2
         ).attr({
@@ -78,7 +118,19 @@
           strokeWidth: 4,
           "fill-opacity": "0"
         });
-        p.drag();
+        if (x1==x2) {
+          var minxDragPoint = 0-x1,
+            minyDragPoint = 0-y1,
+            maxxDragPoint = currentDrawerWidth100-x2,
+            maxyDragPoint = currentDrawerDepth100-y1;
+          p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
+        }else{
+          var minxDragPoint = 0-x1,
+            minyDragPoint = 0-y1,
+            maxxDragPoint = currentDrawerWidth100-x1,
+            maxyDragPoint = currentDrawerDepth100-y2;
+          p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
+        }
       });
     });
   }
@@ -148,28 +200,39 @@
     var halfDrawerWidth = currentDrawerWidth100/2;
     var halfDrawerDepth = currentDrawerDepth100/2;
     var quarterDrawerDepth = currentDrawerDepth100/4;
+    var minxDragPoint = 0-(currentDrawerWidth100*0.25),
+      minyDragPoint = 0-halfDrawerDepth,
+      maxxDragPoint = currentDrawerWidth100-(currentDrawerWidth100*0.25),
+      maxyDragPoint = currentDrawerDepth100-halfDrawerDepth;
     var circleRadius = 10;
     var p = s.path("M " + currentDrawerWidth100*0.25 + " "+ halfDrawerDepth + " " + currentDrawerWidth100*0.75+" "+halfDrawerDepth);
     p.attr({
         stroke: "#000",
         strokeWidth: 4
     });
-    p.drag();
+    p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
   });
 
   $('#vertical-line').click(function(event) {
-    var currentDrawerWidth = drawerWidth + "0";
-    var halfDrawerWidth = currentDrawerWidth/2;
-    var currentDrawerDepth = drawerDepth+'0';
-    var halfDrawerDepth = currentDrawerDepth/2;
-    var quarterDrawerDepth = currentDrawerDepth/4;
+    var currentDrawerWidth = $userForm.find('#drawer-width').val(),
+      currentDrawerDepth = $userForm.find('#drawer-depth').val(),
+      currentDrawerWidth100 = currentDrawerWidth*100,
+      currentDrawerDepth100= currentDrawerDepth*100;
+    var halfDrawerWidth = currentDrawerWidth100/2;
+    var halfDrawerDepth = currentDrawerDepth100/2;
+    var quarterDrawerDepth = currentDrawerDepth100*0.25;
+    var threequarterDrawerDepth = currentDrawerDepth100*0.75;
+    var minxDragPoint = 0-halfDrawerWidth,
+      minyDragPoint = 0-quarterDrawerDepth,
+      maxxDragPoint = halfDrawerWidth,
+      maxyDragPoint = threequarterDrawerDepth;
     var circleRadius = 10;
-    var p = s.path("M"+halfDrawerDepth + " " + halfDrawerDepth + " " + quarterDrawerDepth+" "+halfDrawerDepth).transform('t20,20r90');
+    var p = s.path("M " + halfDrawerWidth + " "+ quarterDrawerDepth + " " + halfDrawerWidth+" "+threequarterDrawerDepth);
     p.attr({
         stroke: "#000",
         strokeWidth: 4
     });
-    p.drag();
+    p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
   });
 
 
