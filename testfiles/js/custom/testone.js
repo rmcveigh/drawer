@@ -22,12 +22,10 @@
   /* canvas variables */
   var canvasHeight100 = drawerDepth*100,
       canvasWidth100 = drawerWidth*100,
-      canvasWidth = canvasWidth100+"px",
-      canvasHeight = canvasHeight100+"px"
+      canvasWidthPx = canvasWidth100+"px",
+      canvasHeightPx = canvasHeight100+"px"
 
   $('#drawing').css({
-    width: canvasWidth,
-    height: canvasHeight,
     background: '#eee',
     border: 'solid #aaa 1px'
   });
@@ -45,12 +43,19 @@
     }
   });
 
-//create canvas
+  //create canvas
   var svgElement = document.getElementById("drawing");
   var s = Snap(svgElement);
   s.attr({ viewBox: "0 0 "+canvasWidth100 +" "+ canvasHeight100});
+  $('#drawing').css({
+      width: canvasWidthPx,
+      height: canvasHeightPx
+    });
 
-//drag limitor plugin
+  //draw outer wall
+  buildOuterwall("outerWall");
+
+  //drag limitor plugin
   (function() {
 
     Snap.plugin( function( Snap, Element, Paper, global ) {
@@ -92,6 +97,15 @@
   $('#clear-btn').click(function(event) {
     event.preventDefault();
     s.clear();
+    //add and remove selected class
+    $('.template-image-link').each(function() {
+      var $thisLink = $(this);
+      if ($thisLink.hasClass('selected')) {
+        $thisLink.removeClass('selected')
+      };
+    });
+    //draw outer wall
+    buildOuterwall("outerWall");
   });
 
   var drawerWidth100 = drawerWidth*100;
@@ -135,6 +149,31 @@
     });
   }
 
+  //build outer wall (could change to hard code if json can't be pulled in)
+    //function that outputs Template
+  function buildOuterwall(jsonFile) {
+    var jsonPath = "json/"+jsonFile+".json",
+    currentDrawerWidth = $userForm.find('#drawer-width').val(),
+    currentDrawerDepth = $userForm.find('#drawer-depth').val(),
+    currentDrawerWidth100 = currentDrawerWidth*100,
+    currentDrawerDepth100= currentDrawerDepth*100;
+
+    $.getJSON(jsonPath,function(result){
+      $.each(result.paths, function(i, path){
+        var x1 = (path.x1)*currentDrawerWidth100,
+          y1 = (path.y1)*currentDrawerDepth100,
+          x2 = (path.x2)*currentDrawerWidth100,
+          y2 = (path.y2)*currentDrawerDepth100;
+        var p = s.path(
+          "M "+x1+" "+y1+" L " +x2+ " "+y2
+        ).attr({
+          stroke: "#000",
+          strokeWidth: 4,
+          "fill-opacity": "0"
+        });
+      });
+    });
+  }
   $(document).on('click', '.template-image-link', function(event) {
     event.preventDefault();
 
@@ -177,9 +216,12 @@
       width: canvasWidth,
       height: canvasHeight
     });
-
+    s.attr({ viewBox: "0 0 "+canvasWidth100 +" "+ canvasHeight100});
     //clear canvas
     s.clear();
+
+    //draw outer wall
+    buildOuterwall("outerWall");
 
     $('.template-image-link').each(function() {
       if ($(this).hasClass('selected')) {
