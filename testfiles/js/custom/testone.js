@@ -12,7 +12,8 @@
     minHeight = $adminForm.find('#min-height').val(),
     minWidth = $adminForm.find('#min-width').val(),
     minDepth = $adminForm.find('#min-depth').val(),
-    minSegmentLength = $adminForm.find('#min-segment-length').val();
+    minSegmentLength = $adminForm.find('#min-segment-length').val(),
+    roundTo = gridUnits*10;
 
   /* set user variables based on user form */
   var $userForm = $('#user-form'),
@@ -23,13 +24,18 @@
   var canvasHeight100 = drawerDepth*100,
       canvasWidth100 = drawerWidth*100,
       canvasWidthPx = canvasWidth100+"px",
-      canvasHeightPx = canvasHeight100+"px"
+      canvasHeightPx = canvasHeight100+"px";
 
+  //nearest multiple function used to acheive snap to grid functionality
+  function roundMultiple(num, multiple) {
+    return(Math.round(num / multiple) * multiple);
+  }
+
+  //styling on canvas
   $('#drawing').css({
-    background: '#eee',
-    border: 'solid #aaa 1px'
   });
 
+  //show admin form
   $(document).on('click', '#admin-form-link', function(event) {
     event.preventDefault();
     $('#admin-form').slideToggle();
@@ -44,12 +50,15 @@
   });
 
   //create canvas
+
   var svgElement = document.getElementById("drawing");
   var s = Snap(svgElement);
   s.attr({ viewBox: "0 0 "+canvasWidth100 +" "+ canvasHeight100});
   $('#drawing').css({
       width: canvasWidthPx,
-      height: canvasHeightPx
+      height: canvasHeightPx,
+      background: '#eee',
+      border: 'solid #aaa 1px'
     });
 
   //draw outer wall
@@ -74,16 +83,22 @@
         var tdx, tdy;
         var sInvMatrix = this.transform().globalMatrix.invert();
             sInvMatrix.e = sInvMatrix.f = 0;
-            tdx = sInvMatrix.x( dx,dy ); tdy = sInvMatrix.y( dx,dy );
+        var tdx = sInvMatrix.x( dx,dy ); tdy = sInvMatrix.y( dx,dy ),
+            gridUnits = $adminForm.find('#grid-units').val(),
+            roundTo = gridUnits*10,
+            currentX = +this.data('ox') + tdx,
+            currentY = +this.data('oy') + tdy,
+            currentXrounded = roundMultiple(currentX, roundTo),
+            currentYrounded = roundMultiple(currentY, roundTo);
 
-        this.data('x', +this.data('ox') + tdx);
-        this.data('y', +this.data('oy') + tdy);
+        this.data('x', currentXrounded);
+        this.data('y', currentYrounded);
         if( this.data('x') > this.data('maxx') - this.data('ibb').width  )
           { this.data('x', this.data('maxx') - this.data('ibb').width  ) };
         if( this.data('y') > this.data('maxy') - this.data('ibb').height )
           { this.data('y', this.data('maxy') - this.data('ibb').height ) };
         if( this.data('x') < this.data('minx') ) { this.data('x', this.data('minx') ) };
-              if( this.data('y') < this.data('miny') ) { this.data('y', this.data('miny') ) };
+        if( this.data('y') < this.data('miny') ) { this.data('y', this.data('miny') ) };
         this.transform( this.data('ot') + "t" + [ this.data('x'), this.data('y') ]  );
       };
 
@@ -210,7 +225,7 @@
     var canvasHeight100 = drawerDepth*100,
       canvasWidth100 = drawerWidth*100,
       canvasWidth = canvasWidth100+"px",
-      canvasHeight = canvasHeight100+"px"
+      canvasHeight = canvasHeight100+"px";
     /* on input change, reset canvas css */
     $('#drawing').css({
       width: canvasWidth,
@@ -277,5 +292,39 @@
     p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
   });
 
+  $('#save-page').click(function(event) {
+    event.preventDefault();
+    var a= [],
+      points="",
+      paths = "";
+    $('svg path').each(function(index, el) {
+      var $thisPath = $(this),
+        array=[],
+        thisDValue = $thisPath.attr('d'),
+        splitString = thisDValue.replace('M ', '').replace('L ', '').split(' ');
+      $.each(splitString, function(i, val) {
+        var val = parseFloat(val);
+         if (i == 0) {
+          var x1 = '{"x1": '+ val+', ';
+          points += x1;
+         }else if (i == 1) {
+          var y1 = '"y1": '+val+', ';
+          points += y1;
+         }else if (i == 2) {
+          var x2 = '"x2": '+val+', ';
+          points += x2;
+         }else if (i == 3) {
+          var y2 = '"y2": '+val+'}';
+          points += y2;
+         }
+      });
+      // a.push(array);
+      // var json=JSON.stringify({paths: array});
+      paths += points;
+    });
+    points.replace('}{', '}, {');
+    var json='{ "paths": [ ' + points.replace(/\}{/g, '}, {') + " ] }";
+    alert("Just saved this json: "+json);
+  });
 
 }(jQuery));
