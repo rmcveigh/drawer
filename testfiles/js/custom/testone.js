@@ -19,12 +19,18 @@
   var $userForm = $('#user-form'),
     drawerHeight = $userForm.find('#drawer-height').val(),
     drawerWidth = $userForm.find('#drawer-width').val(),
-    drawerDepth = $userForm.find('#drawer-depth').val();
+    drawerDepth = $userForm.find('#drawer-depth').val(),
+    drawerWidth100 = drawerWidth*100,
+    drawerDepth100= drawerDepth*100;
+
   /* canvas variables */
   var canvasHeight100 = drawerDepth*100,
       canvasWidth100 = drawerWidth*100,
       canvasWidthPx = canvasWidth100+"px",
       canvasHeightPx = canvasHeight100+"px";
+
+  /*ui variables */
+  var handleSize = 7;
 
   //nearest multiple function used to acheive snap to grid functionality
   function roundMultiple(num, multiple) {
@@ -108,69 +114,113 @@
     });
   })();
 
-  Snap.plugin( function( Snap, Element, Paper, global ) {
+  (function() {
+    Snap.plugin(function( Snap, Element, Paper, global ) {
+      Element.prototype.addHandles = function( params ) {
+        //primary vars
+        var line=this,
+          bb=line.getBBox(),
+          px2 = line.attr("x2"),
+          py2 = line.attr("y2"),
+          px1 = line.attr("x1"),
+          py1 = line.attr("y1"),
+          pcx = bb.cx,
+          pcy = bb.cy;
 
-    Element.prototype.addHandles = function() {
-    var dragging = 0;
-    var handleGroup;
+        //current drawer vars
+        var currentDrawerWidth = $userForm.find('#drawer-width').val(),
+          currentDrawerDepth = $userForm.find('#drawer-depth').val(),
+          currentDrawerWidth100 = currentDrawerWidth*100,
+          currentDrawerDepth100= currentDrawerDepth*100;
+          //create handles
+        var resizeCircle = s.circle(bb.x2,bb.y2,handleSize).attr({fill:"red"});
+        var moveCircle = s.circle(bb.cx,bb.cy,handleSize).attr({fill:"red"});
 
-    var startResize = function() {
-            this.data('origTransform', this.transform().local);
-    }
+        if (px2 == px1) {
 
-    var moveResize = function(dx,dy) {
-            var scale = 1 + dx / 50;
-            this.attr({
-                    transform: this.data('origTransform') + (this.data('origTransform') ? "S" : "s") + scale
-            });
-    }
+          //line is vertical!!!
 
-    var stopResize = function() {};
+          //resize on move action
+          var resizeMove = function(dx,dy) {
+            var bb=line.getBBox();
+            this.attr({cy:+py2+dy});
+            line.attr({y2:+py2+dy});
+            moveCircle.attr({cy:+bb.cy});
+          }
 
-    var bb = this.getBBox();
+          //resize on start action
+          var resizeStart = function() {
+            var bb=line.getBBox();
+            py1 = line.attr("y1");
+            py2 = line.attr("y2");
+            pcy = bb.cy;
+          }
 
-    var x= bb.x,
-      y=bb.y,
-      x2 = bb.x2,
-      y2=bb.y2,
-      centerX=bb.cx,
-      centerY=bb.cy,
-      handle = new Array();
+          //resize on stop action
+          var resizeStop = function() {
+          }
 
-    var currentDrawerWidth = $userForm.find('#drawer-width').val(),
-      currentDrawerDepth = $userForm.find('#drawer-depth').val(),
-      currentDrawerWidth100 = currentDrawerWidth*100,
-      currentDrawerDepth100= currentDrawerDepth*100;
+          //start resize drag action
+          resizeCircle.drag(resizeMove, resizeStart, resizeStop);
 
-    var halfDrawerWidth = currentDrawerWidth100/2;
+        } else {
 
-    var halfDrawerDepth = currentDrawerDepth100/2;
+          //line is horizontal!!!
 
-    var quarterDrawerDepth = currentDrawerDepth100/4;
+          //resize on move action
+          var resizeMove = function(dx,dy) {
+            var bb=line.getBBox();
+            this.attr({cx:+px2+dx});
+            line.attr({x2:+px2+dx});
+            moveCircle.attr({cx:+bb.cx});
+          }
 
-    var minxDragPoint = 0-(currentDrawerWidth100*0.25),
-      minyDragPoint = 0-halfDrawerDepth,
-      maxxDragPoint = currentDrawerWidth100-(currentDrawerWidth100*0.25),
-      maxyDragPoint = currentDrawerDepth100-halfDrawerDepth;
+          //resize on start action
+          var resizeStart = function() {
+            px1 = line.attr("x1");
+            pcx = px1+((px2-px1)/2);
+            px2 = line.attr("x2");
+          }
 
-    var ftOption = {
-      handleFill: "silver",
-      handleStrokeDash: "5,5",
-      handleStrokeWidth: "2",
-      handleLength: "75",
-      handleRadius: "7",
-      handleLineWidth: 2,
-    };
+          //resize on stop action
+          var resizeStop = function() {
+          }
 
-    handle[0] = s.circle(x, y, ftOption.handleRadius).attr({class: 'handler', fill: ftOption.handleFill});
-    handle[1] = s.circle(x2, y2, ftOption.handleRadius).attr({class: 'handler', fill: ftOption.handleFill});
-    handle[2] = s.circle(centerX, centerY, ftOption.handleRadius).attr({class: 'handler', fill: ftOption.handleFill});
-    handleGroup = s.group(handle[0], handle[1], handle[2]);
-    // handleGroup.drag();
-    // handleGroup.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
-    };
+          //start resize drag action
+          resizeCircle.drag(resizeMove, resizeStart, resizeStop);
 
-  })
+        }//end else
+
+        //move on move action
+        var moveMove = function(dx,dy) {
+          line.attr({x1:+px1+dx, y1:+py1+dy, x2:+px2+dx, y2:+py2+dy});
+          this.attr({cx:+pcx+dx, cy:+pcy+dy});
+          resizeCircle.attr({cx:+px2+dx, cy:+py2+dy});
+        }
+
+        //move on start action
+        var moveStart = function() {
+          var bb=line.getBBox();
+          px1 = line.attr("x1");
+          px2 = line.attr("x2");
+          py1 = line.attr("y1");
+          py2 = line.attr("y2");
+          pcx = bb.cx;
+          pcy = bb.cy;
+        }
+
+        //move on stop action
+        var moveStop = function() {
+        }
+
+        //start move drag action
+        moveCircle.drag(moveMove, moveStart, moveStop);
+
+
+      };//end addHandles Function
+    });
+  })();
+
 
   // opens dialog then clears the canvas
   $('#clear-btn').click(function(event) {
@@ -178,17 +228,13 @@
     $( "#clear-canvas-dialog" ).dialog( "open" );
   });
 
-
-  var drawerWidth100 = drawerWidth*100;
-  var drawerDepth100= drawerDepth*100;
-
   //function that outputs Template (NON-FLEXIBLY) from orig json file.
   function getFixedTemplate(jsonFile){
     var jsonPath = "json/"+jsonFile+"Length.json",
-    currentDrawerWidth = $userForm.find('#drawer-width').val(),
-    currentDrawerDepth = $userForm.find('#drawer-depth').val(),
-    currentDrawerWidth100 = currentDrawerWidth*100,
-    currentDrawerDepth100= currentDrawerDepth*100;
+      currentDrawerWidth = $userForm.find('#drawer-width').val(),
+      currentDrawerDepth = $userForm.find('#drawer-depth').val(),
+      currentDrawerWidth100 = currentDrawerWidth*100,
+      currentDrawerDepth100= currentDrawerDepth*100;
 
     $.getJSON(jsonPath,function(result){
       $.each(result.paths, function(i, path){
@@ -196,8 +242,8 @@
           y1 = path.y1,
           x2 = path.x2,
           y2 = path.y2;
-        var p = s.path(
-          "M "+x1+" "+y1+" L " +x2+ " "+y2
+        var p = s.line(
+          x1, y1, x2, y2
         ).attr({
           stroke: "#000",
           strokeWidth: 4,
@@ -208,13 +254,15 @@
             minyDragPoint = 0-y1,
             maxxDragPoint = currentDrawerWidth100-x2,
             maxyDragPoint = currentDrawerDepth100-y1;
-          p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
+            p.addHandles();
+          // p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
         }else{
           var minxDragPoint = 0-x1,
             minyDragPoint = 0-y1,
             maxxDragPoint = currentDrawerWidth100-x1,
             maxyDragPoint = currentDrawerDepth100-y2;
-          p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
+            p.addHandles();
+          // p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
         }
       });
     });
@@ -223,10 +271,10 @@
   //function that outputs Template FLEXIBLY from orig jSon File.
   function getFlexableTemplate(jsonFile) {
     var jsonPath = "json/"+jsonFile+".json",
-    currentDrawerWidth = $userForm.find('#drawer-width').val(),
-    currentDrawerDepth = $userForm.find('#drawer-depth').val(),
-    currentDrawerWidth100 = currentDrawerWidth*100,
-    currentDrawerDepth100= currentDrawerDepth*100;
+      currentDrawerWidth = $userForm.find('#drawer-width').val(),
+      currentDrawerDepth = $userForm.find('#drawer-depth').val(),
+      currentDrawerWidth100 = currentDrawerWidth*100,
+      currentDrawerDepth100= currentDrawerDepth*100;
 
     $.getJSON(jsonPath,function(result){
       $.each(result.paths, function(i, path){
@@ -234,8 +282,8 @@
           y1 = (path.y1)*currentDrawerDepth100,
           x2 = (path.x2)*currentDrawerWidth100,
           y2 = (path.y2)*currentDrawerDepth100;
-        var p = s.path(
-          "M "+x1+" "+y1+" L " +x2+ " "+y2
+        var p = s.line(
+          x1, y1, x2, y2
         ).attr({
           stroke: "#000",
           strokeWidth: 4,
@@ -246,13 +294,15 @@
             minyDragPoint = 0-y1,
             maxxDragPoint = currentDrawerWidth100-x2,
             maxyDragPoint = currentDrawerDepth100-y1;
-          p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
+            p.addHandles();
+          // p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
         }else{
           var minxDragPoint = 0-x1,
             minyDragPoint = 0-y1,
             maxxDragPoint = currentDrawerWidth100-x1,
             maxyDragPoint = currentDrawerDepth100-y2;
-          p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
+            p.addHandles();
+          // p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
         }
       });
     });
@@ -262,10 +312,10 @@
   //function that outputs Template where VECTORS ARE NOT DRAGGABLE!
   function buildOuterwall(jsonFile) {
     var jsonPath = "json/"+jsonFile+".json",
-    currentDrawerWidth = $userForm.find('#drawer-width').val(),
-    currentDrawerDepth = $userForm.find('#drawer-depth').val(),
-    currentDrawerWidth100 = currentDrawerWidth*100,
-    currentDrawerDepth100= currentDrawerDepth*100;
+      currentDrawerWidth = $userForm.find('#drawer-width').val(),
+      currentDrawerDepth = $userForm.find('#drawer-depth').val(),
+      currentDrawerWidth100 = currentDrawerWidth*100,
+      currentDrawerDepth100= currentDrawerDepth*100;
 
     $.getJSON(jsonPath,function(result){
       $.each(result.paths, function(i, path){
@@ -273,8 +323,8 @@
           y1 = (path.y1)*currentDrawerDepth100,
           x2 = (path.x2)*currentDrawerWidth100,
           y2 = (path.y2)*currentDrawerDepth100;
-        var p = s.path(
-          "M "+x1+" "+y1+" L " +x2+ " "+y2
+        var p = s.line(
+          x1, y1, x2, y2
         ).attr({
           stroke: "#000",
           strokeWidth: 4,
@@ -379,14 +429,13 @@
       minyDragPoint = 0-halfDrawerDepth,
       maxxDragPoint = currentDrawerWidth100-(currentDrawerWidth100*0.25),
       maxyDragPoint = currentDrawerDepth100-halfDrawerDepth;
-    var circleRadius = 10;
-    var p = s.path("M " + currentDrawerWidth100*0.25 + " "+ halfDrawerDepth + " " + currentDrawerWidth100*0.75+" "+halfDrawerDepth);
+    var p = s.line(currentDrawerWidth100*0.25, halfDrawerDepth, currentDrawerWidth100*0.75, halfDrawerDepth);
     p.attr({
         stroke: "#000",
         strokeWidth: 4
     });
-    p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
-    // p.addHandles()
+    // p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
+    p.addHandles();
   });
 
   //create vertical line
@@ -404,45 +453,29 @@
       maxxDragPoint = halfDrawerWidth,
       maxyDragPoint = threequarterDrawerDepth;
     var circleRadius = 10;
-    var p = s.path("M " + halfDrawerWidth + " "+ quarterDrawerDepth + " " + halfDrawerWidth+" "+threequarterDrawerDepth);
+    var p = s.line(halfDrawerWidth, quarterDrawerDepth, halfDrawerWidth, threequarterDrawerDepth);
     p.attr({
         stroke: "#000",
         strokeWidth: 4
     });
-    p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
+    p.addHandles();
+    // p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
   });
 
+
+  //export json in needed format. Exports in Pixels!!!
   $('#save-page').click(function(event) {
     event.preventDefault();
     var a= [],
       points="",
       paths = "";
-    $('svg path').each(function(index, el) {
-      var $thisPath = $(this),
-        array=[],
-        thisDValue = $thisPath.attr('d'),
-        splitString = thisDValue.replace('M ', '').replace('L ', '').split(' ');
-      $.each(splitString, function(i, val) {
-        var val = parseFloat(val);
-         if (i == 0) {
-          var x1 = '{"x1": '+ val+', ';
-          points += x1;
-         }else if (i == 1) {
-          var y1 = '"y1": '+val+', ';
-          points += y1;
-         }else if (i == 2) {
-          var x2 = '"x2": '+val+', ';
-          points += x2;
-         }else if (i == 3) {
-          var y2 = '"y2": '+val+'}';
-          points += y2;
-         }
-      });
-      // a.push(array);
-      // var json=JSON.stringify({paths: array});
-      paths += points;
+    $('svg line').each(function(index, el) {
+      var x1 = $(this).attr('x1'),
+        y1 = $(this).attr('y1'),
+        x2 = $(this).attr('x2'),
+        y2 = $(this).attr('y2');
+      points+='{"x1": '+x1+', "y1": '+y1+', "x2": '+x2+', "y2": '+y2+'}';
     });
-    points.replace('}{', '}, {');
     var json='{ "paths": [ ' + points.replace(/\}{/g, '}, {') + " ] }";
     alert("Just saved this json: "+json);
   });
