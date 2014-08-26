@@ -132,90 +132,165 @@
           currentDrawerDepth = $userForm.find('#drawer-depth').val(),
           currentDrawerWidth100 = currentDrawerWidth*100,
           currentDrawerDepth100= currentDrawerDepth*100;
+
+        //check if the it is an outer line
+        if (
+            (px1==0 && px2==currentDrawerWidth100 && py1==0 && py2==0)
+            ||(px1==0 && px2==0 && py1==currentDrawerDepth100 && py2==0)
+            ||(px1==currentDrawerWidth100 && px2==currentDrawerWidth100 && py1==0 && py2==currentDrawerDepth100)
+            ||(px1==currentDrawerWidth100 && px2==0 && py1==currentDrawerDepth100 && py2==currentDrawerDepth100)
+          ) {
+        }else{
+          //if it isn't an outer line:
+
           //create handles
-        var resizeCircle = s.circle(bb.x2,bb.y2,handleSize).attr({fill:"red"});
-        var moveCircle = s.circle(bb.cx,bb.cy,handleSize).attr({fill:"red"});
+          var resizeCircle = s.circle(bb.x2,bb.y2,handleSize).attr({fill:"red"});
+          var moveCircle = s.circle(bb.cx,bb.cy,handleSize).attr({fill:"red"});
 
-        if (px2 == px1) {
+          if (px2 == px1) {
+            //if line is vertical
 
-          //line is vertical!!!
+            //resize on move action
+            var resizeMove = function(dx,dy) {
+              var bb = line.getBBox(),
+                  rcy = +py2+dy,
+                  ly2 = +py2+dy,
+                  mcy = +bb.cy;
+              this.attr({cy: rcy});
+              line.attr({y2: ly2});
+              moveCircle.attr({cy: mcy});
+            }
 
-          //resize on move action
-          var resizeMove = function(dx,dy) {
+            //resize on start action
+            var resizeStart = function() {
+              var bb=line.getBBox();
+              py1 = line.attr("y1");
+              py2 = line.attr("y2");
+              pcy = bb.cy;
+            }
+
+            //resize on stop action
+            var resizeStop = function() {
+            }
+
+            //start resize drag action
+            resizeCircle.drag(resizeMove, resizeStart, resizeStop);
+
+          } else {
+
+            //line is horizontal!!!
+
+            //resize on move action
+            var resizeMove = function(dx,dy) {
+              var bb=line.getBBox();
+              this.attr({cx:+px2+dx});
+              line.attr({x2:+px2+dx});
+              moveCircle.attr({cx:+bb.cx});
+            }
+
+            //resize on start action
+            var resizeStart = function() {
+              px1 = line.attr("x1");
+              pcx = px1+((px2-px1)/2);
+              px2 = line.attr("x2");
+            }
+
+            //resize on stop action
+            var resizeStop = function() {
+            }
+
+            //start resize drag action
+            resizeCircle.drag(resizeMove, resizeStart, resizeStop);
+
+          }//end vertical check else statement
+
+          //move on move action
+          var moveMove = function(dx,dy) {
             var bb=line.getBBox();
-            this.attr({cy:+py2+dy});
-            line.attr({y2:+py2+dy});
-            moveCircle.attr({cy:+bb.cy});
+                lx1 = +px1+dx,
+                ly1 = +py1+dy,
+                lx2 = +px2+dx,
+                ly2 = +py2+dy,
+                mcx = +pcx+dx,
+                mcy = +pcy+dy,
+                rcx = +px2+dx,
+                rcy = +py2+dy,
+                gridUnits = $adminForm.find('#grid-units').val(),
+                roundTo = gridUnits*10,
+                roundLx1 = roundMultiple(lx1, roundTo),
+                roundLy1 = roundMultiple(ly1, roundTo),
+                roundLx2 = roundMultiple(lx2, roundTo),
+                roundLy2 = roundMultiple(ly2, roundTo),
+                roundMcx = roundMultiple(mcx, roundTo),
+                roundMcy = roundMultiple(mcy, roundTo),
+                roundRcx = roundMultiple(rcx, roundTo),
+                roundRcy = roundMultiple(rcy, roundTo);
+            if (lx1 <= 0) {
+              var lx1Sum = 0-lx1;
+              line.attr({x1:lx1+lx1Sum, y1:ly1, x2:lx2+lx1Sum, y2:ly2});
+              this.attr({cx:mcx+lx1Sum, cy:mcy});
+              resizeCircle.attr({cx:rcx+lx1Sum, cy:rcy});
+            }else if (lx2 > currentDrawerWidth100) {
+              var lx2Sum = lx2-currentDrawerWidth100;
+              line.attr({x1:lx1-lx2Sum, y1:ly1, x2:lx2-lx2Sum, y2:ly2});
+              this.attr({cx:mcx-lx2Sum, cy:mcy});
+              resizeCircle.attr({cx:rcx-lx2Sum, cy:rcy});
+            }else if (ly1 < 0) {
+              var ly1Sum = 0-ly1;
+              line.attr({x1:lx1, y1:ly1+ly1Sum, x2:lx2, y2:ly2+ly1Sum});
+              this.attr({cx:mcx, cy:mcy+ly1Sum});
+              resizeCircle.attr({cx:rcx, cy:rcy+ly1Sum});
+            }else if (ly2 > currentDrawerDepth100) {
+              var ly2Sum = ly2-currentDrawerDepth100;
+              line.attr({x1:lx1, y1:ly1-ly2Sum, x2:lx2, y2:ly2-ly2Sum});
+              this.attr({cx:mcx, cy:mcy-ly2Sum});
+              resizeCircle.attr({cx:rcx, cy:rcy-ly2Sum});
+            }else if (lx2 < 0) {
+              var lx2Sum = 0-lx2;
+              line.attr({x1:lx1+lx2Sum, y1:ly1, x2:lx2+lx2Sum, y2:ly2});
+              this.attr({cx:mcx+lx2Sum, cy:mcy});
+              resizeCircle.attr({cx:rcx+lx2Sum, cy:rcy});
+            }else if (lx1 > currentDrawerWidth100) {
+              var lx1Sum = lx1-currentDrawerWidth100;
+              line.attr({x1:lx1-lx1Sum, y1:ly1, x2:lx2-lx1Sum, y2:ly2});
+              this.attr({cx:mcx-lx1Sum, cy:mcy});
+              resizeCircle.attr({cx:rcx-lx1Sum, cy:rcy});
+            }else if (ly2 < 0) {
+              var ly2Sum = 0-ly2;
+              line.attr({x1:lx1, y1:ly1+ly2Sum, x2:lx2, y2:ly2+ly2Sum});
+              this.attr({cx:mcx, cy:mcy+ly2Sum});
+              resizeCircle.attr({cx:rcx, cy:rcy+ly2Sum});
+            }else if (ly1 > currentDrawerDepth100) {
+              var ly1Sum = ly1-currentDrawerDepth100;
+              line.attr({x1:lx1, y1:ly1-ly1Sum, x2:lx2, y2:ly2-ly1Sum});
+              this.attr({cx:mcx, cy:mcy-ly1Sum});
+              resizeCircle.attr({cx:rcx, cy:rcy-ly1Sum});
+            }else{
+              line.attr({x1:roundLx1, y1:roundLy1, x2:roundLx2, y2:roundLy2});
+              this.attr({cx:roundMcx, cy:roundMcy});
+              resizeCircle.attr({cx:roundRcx, cy:roundRcy});
+            }
           }
 
-          //resize on start action
-          var resizeStart = function() {
+          //move on start action
+          var moveStart = function() {
             var bb=line.getBBox();
+            px1 = line.attr("x1");
+            px2 = line.attr("x2");
             py1 = line.attr("y1");
             py2 = line.attr("y2");
+            pcx = bb.cx;
             pcy = bb.cy;
           }
 
-          //resize on stop action
-          var resizeStop = function() {
+          //move on stop action
+          var moveStop = function() {
           }
 
-          //start resize drag action
-          resizeCircle.drag(resizeMove, resizeStart, resizeStop);
+          //start move drag action
+          moveCircle.drag(moveMove, moveStart, moveStop);
 
-        } else {
-
-          //line is horizontal!!!
-
-          //resize on move action
-          var resizeMove = function(dx,dy) {
-            var bb=line.getBBox();
-            this.attr({cx:+px2+dx});
-            line.attr({x2:+px2+dx});
-            moveCircle.attr({cx:+bb.cx});
-          }
-
-          //resize on start action
-          var resizeStart = function() {
-            px1 = line.attr("x1");
-            pcx = px1+((px2-px1)/2);
-            px2 = line.attr("x2");
-          }
-
-          //resize on stop action
-          var resizeStop = function() {
-          }
-
-          //start resize drag action
-          resizeCircle.drag(resizeMove, resizeStart, resizeStop);
-
-        }//end else
-
-        //move on move action
-        var moveMove = function(dx,dy) {
-          line.attr({x1:+px1+dx, y1:+py1+dy, x2:+px2+dx, y2:+py2+dy});
-          this.attr({cx:+pcx+dx, cy:+pcy+dy});
-          resizeCircle.attr({cx:+px2+dx, cy:+py2+dy});
-        }
-
-        //move on start action
-        var moveStart = function() {
-          var bb=line.getBBox();
-          px1 = line.attr("x1");
-          px2 = line.attr("x2");
-          py1 = line.attr("y1");
-          py2 = line.attr("y2");
-          pcx = bb.cx;
-          pcy = bb.cy;
-        }
-
-        //move on stop action
-        var moveStop = function() {
-        }
-
-        //start move drag action
-        moveCircle.drag(moveMove, moveStart, moveStop);
-
+        }//end outer line else
 
       };//end addHandles Function
     });
