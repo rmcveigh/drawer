@@ -2,26 +2,30 @@
 
   /* set admin variables based on admin form */
   var $adminForm = $('#admin-form'),
-    thickness = $adminForm.find('#material-thickness').val(),
-    overlapJointClearance = $adminForm.find('#overlap-clearance').val(),
-    kerfClearance = $adminForm.find('#kerf-clearance').val(),
-    gridUnits = $adminForm.find('#grid-units').val(),
-    maxHeight = $adminForm.find('#max-height').val(),
-    maxWidth = $adminForm.find('#max-width').val(),
-    maxDepth = $adminForm.find('#max-depth').val(),
-    minHeight = $adminForm.find('#min-height').val(),
-    minWidth = $adminForm.find('#min-width').val(),
-    minDepth = $adminForm.find('#min-depth').val(),
-    minSegmentLength = $adminForm.find('#min-segment-length').val(),
-    roundTo = gridUnits*10;
+      thickness = $adminForm.find('#material-thickness').val(),
+      pricePerInch = $adminForm.find('#price-per-inch').val(),
+      productBasePrice = $adminForm.find('#product-base-price').val(),
+      pricePerPound = $adminForm.find('#price-per-pound').val(),
+      shippingBasePrice = $adminForm.find('#shipping-base-price').val(),
+      overlapJointClearance = $adminForm.find('#overlap-clearance').val(),
+      kerfClearance = $adminForm.find('#kerf-clearance').val(),
+      gridUnits = $adminForm.find('#grid-units').val(),
+      maxHeight = $adminForm.find('#max-height').val(),
+      maxWidth = $adminForm.find('#max-width').val(),
+      maxDepth = $adminForm.find('#max-depth').val(),
+      minHeight = $adminForm.find('#min-height').val(),
+      minWidth = $adminForm.find('#min-width').val(),
+      minDepth = $adminForm.find('#min-depth').val(),
+      minSegmentLength = $adminForm.find('#min-segment-length').val(),
+      roundTo = gridUnits*10;
 
   /* set user variables based on user form */
   var $userForm = $('#user-form'),
-    drawerHeight = $userForm.find('#drawer-height').val(),
-    drawerWidth = $userForm.find('#drawer-width').val(),
-    drawerDepth = $userForm.find('#drawer-depth').val(),
-    drawerWidth100 = drawerWidth*100,
-    drawerDepth100= drawerDepth*100;
+      drawerHeight = $userForm.find('#drawer-height').val(),
+      drawerWidth = $userForm.find('#drawer-width').val(),
+      drawerDepth = $userForm.find('#drawer-depth').val(),
+      drawerWidth100 = drawerWidth*100,
+      drawerDepth100= drawerDepth*100;
 
   /* canvas variables */
   var canvasHeight100 = drawerDepth*100,
@@ -37,6 +41,20 @@
   function roundMultiple(num, multiple) {
     return(Math.round(num / multiple) * multiple);
   }
+
+  //set user form min and max values based on admin form
+  $userForm.find('#drawer-height').attr({
+    min: minHeight,
+    max: maxHeight
+  });
+  $userForm.find('#drawer-width').attr({
+    min: minWidth,
+    max: maxWidth
+  });
+  $userForm.find('#drawer-depth').attr({
+    min: minDepth,
+    max: maxDepth
+  });
 
   //show admin form
   $(document).on('click', '#admin-form-link', function(event) {
@@ -364,6 +382,56 @@
             ||(x1==currentDrawerWidth100 && x2==currentDrawerWidth100 && y1==0 && y2==currentDrawerDepth100)
             ||(x1==currentDrawerWidth100 && x2==0 && y1==currentDrawerDepth100 && y2==currentDrawerDepth100)
           ) {
+        } else if(x1 != 0 && x2 == currentDrawerWidth100){
+          var p = s.line(
+            roundX1, roundY1, currentDrawerWidth100, roundY2
+          ).attr({
+            stroke: "#000",
+            strokeWidth: 4,
+            "fill-opacity": "0"
+          });
+
+          p.addHandles();
+        } else if(x1 == 0 && x2 == currentDrawerWidth100){
+          var p = s.line(
+            0, roundY1, currentDrawerWidth100, roundY2
+          ).attr({
+            stroke: "#000",
+            strokeWidth: 4,
+            "fill-opacity": "0"
+          });
+
+          p.addHandles();
+        } else if(y1 != 0 && y2 == currentDrawerDepth100){
+          var p = s.line(
+            roundX1, roundY1, roundX2, currentDrawerDepth100
+          ).attr({
+            stroke: "#000",
+            strokeWidth: 4,
+            "fill-opacity": "0"
+          });
+
+          p.addHandles();
+        } else if(y1 == 0 && y2 == currentDrawerDepth100){
+          var p = s.line(
+            roundX1, 0, roundX2, currentDrawerDepth100
+          ).attr({
+            stroke: "#000",
+            strokeWidth: 4,
+            "fill-opacity": "0"
+          });
+
+          p.addHandles();
+        } else if(y1 == 0 && y2 != 0){
+          var p = s.line(
+            roundX1, 0, roundX2, roundY2
+          ).attr({
+            stroke: "#000",
+            strokeWidth: 4,
+            "fill-opacity": "0"
+          });
+
+          p.addHandles();
         }else{
           var p = s.line(
             roundX1, roundY1, roundX2, roundY2
@@ -544,6 +612,42 @@
   //admin form submit action
   $('#admin-form').submit(function(event) {
     event.preventDefault();
+
+    /* set admin variables based on admin form */
+    var $adminForm = $('#admin-form'),
+      thickness = $adminForm.find('#material-thickness').val(),
+      pricePerInch = $adminForm.find('#price-per-inch').val(),
+      productBasePrice = $adminForm.find('#product-base-price').val(),
+      pricePerPound = $adminForm.find('#price-per-pound').val(),
+      shippingBasePrice = $adminForm.find('#shipping-base-price').val(),
+      overlapJointClearance = $adminForm.find('#overlap-clearance').val(),
+      kerfClearance = $adminForm.find('#kerf-clearance').val(),
+      gridUnits = $adminForm.find('#grid-units').val(),
+      maxHeight = $adminForm.find('#max-height').val(),
+      maxWidth = $adminForm.find('#max-width').val(),
+      maxDepth = $adminForm.find('#max-depth').val(),
+      minHeight = $adminForm.find('#min-height').val(),
+      minWidth = $adminForm.find('#min-width').val(),
+      minDepth = $adminForm.find('#min-depth').val(),
+      minSegmentLength = $adminForm.find('#min-segment-length').val(),
+      roundTo = gridUnits*10;
+
+    //set user form min and max values based on admin form
+    $userForm.find('#drawer-height').attr({
+      min: minHeight,
+      max: maxHeight
+    });
+    $userForm.find('#drawer-width').attr({
+      min: minWidth,
+      max: maxWidth
+    });
+    $userForm.find('#drawer-depth').attr({
+      min: minDepth,
+      max: maxDepth
+    });
+
+
+    //redraw background grid
     $('#drawing path').remove();
     //draw background grid
     bckGrid();
@@ -612,6 +716,40 @@
     var json='{ "paths": [ ' + points.replace(/\}{/g, '}, {') + " ] }";
     console.log(json);
     alert("Saved! Check out the console for json file");
+  });
+
+  //get quote
+  $('#get-quote').click(function(event) {
+    event.preventDefault();
+
+    //drawer vars
+    var currentDrawerWidth = $userForm.find('#drawer-width').val(),
+      currentDrawerDepth = $userForm.find('#drawer-depth').val(),
+      currentDrawerHeight = $userForm.find('#drawer-height').val();
+
+    //admin vars
+    var $adminForm = $('#admin-form'),
+      thickness = $adminForm.find('#material-thickness').val(),
+      pricePerInch = $adminForm.find('#price-per-inch').val(),
+      productBasePrice = $adminForm.find('#product-base-price').val(),
+      pricePerPound = $adminForm.find('#price-per-pound').val(),
+      shippingBasePrice = $adminForm.find('#shipping-base-price').val();
+
+    var productL = 0; //product length
+
+    $('#drawing line').each(function(index, el) {
+      var bb = this.getBBox();
+      var thisWidth = bb.width/100; //current width
+      var thisHeight = bb.height/100; //current height
+      var thisL = thisWidth+thisHeight;
+      productL = thisL+productL;
+      console.log(bb);
+    });
+
+    var productSA = productL*currentDrawerHeight;
+    var currentPrice = pricePerInch*productSA
+    var productPrice = currentPrice+productBasePrice;
+    alert('Current Product Price = '+productPrice);
   });
 
   //create template dialog

@@ -16,19 +16,29 @@
     <form action="#" id="admin-form">
       Material Thickness:  <input type="number" id="material-thickness" value="0.22" step="any" name="thickness" min="0"> inches
       <br>
-      Overlap joint clearance:  <input type="number" id="overlap-clearance" value="0.22" step="any" name="overlap-clearance" min="0"> inches
+      Overlap joint clearance:  <input type="number" id="overlap-clearance" value="0.0625" step="any" name="overlap-clearance" min="0"> inches
       <br>
-      Kerf clearance:  <input type="number" id="kerf-clearance" value="0.22" step="any" name="kerf-clearance" min="0"> inches
+      Kerf clearance:  <input type="number" id="kerf-clearance" value="0.006" step="any" name="kerf-clearance" min="0"> inches
       <br>
-      Grid units:  <input type="number" id="grid-units" value="2" step="any" name="grid-units" min="0"> inches
+      Grid units:  <input type="number" id="grid-units" value="4" step="any" name="grid-units" min="0"> inches
+      <br>
+      <h3>Product Price Parameters</h3>
+      Product Price: $<input type="number" id="price-per-inch" value="0.5" step="any" name="price-per-inch" min="0"> USD per square inch
+      <br>
+      Product base price: $<input type="number" id="product-base-price" value="1.00" step="any" name="product-base-price" min="0"> USD
+      <br>
+      <h3>Shipping Price Parameters</h3>
+      Shipping price: $<input type="number" id="price-per-pound" value="1.00" step="any" name="price-per-pound" min="0"> USD per pound
+      <br>
+      Shipping base price: $<input type="number" id="shipping-base-price" value="10.00" step="any" name="shipping-base-price" min="0"> USD
       <br>
       <h3>Max drawer dimensions</h3>
-      height:  <input type="number" id="max-height" value="0.22" step="any" name="max-height" min="0"> inches, width:  <input type="number" id="max-width" value="0.22" step="any" name="max-width" min="0"> inches, depth:  <input type="number" id="max-depth" value="0.22" step="any" name="max-depth" min="0"> inches
+      height:  <input type="number" id="max-height" value="4" step="any" name="max-height" min="0"> inches, width:  <input type="number" id="max-width" value="38" step="any" name="max-width" min="0"> inches, depth:  <input type="number" id="max-depth" value="24" step="any" name="max-depth" min="0"> inches
       <br>
       <h3>Min drawer dimensions</h3>
-      height:  <input type="number" id="min-height" value="0.22" step="any" name="min-height" min="0"> inches, width:  <input type="number" id="min-width" value="0.22" step="any" name="min-width" min="0"> inches, depth:  <input type="number" id="min-depth" value="0.22" step="any" name="min-depth" min="0"> inches
+      height:  <input type="number" id="min-height" value="1" step="any" name="min-height" min="0"> inches, width:  <input type="number" id="min-width" value="3" step="any" name="min-width" min="0"> inches, depth:  <input type="number" id="min-depth" value="3" step="any" name="min-depth" min="0"> inches
       <br>
-      Min segment length:  <input type="number" id="min-segment-length" value="0.22" step="any" name="min-segment-length" min="0"> inches
+      Min segment length:  <input type="number" id="min-segment-length" value="0.5" step="any" name="min-segment-length" min="0"> inches
       <br>
       <button type="submit" id="submit-btn">Submit</button>
     </form>
@@ -40,6 +50,7 @@
       height:  <input type="number" id="drawer-height" value="4" step="any" name="drawer-height" min="0.5"> inches, width:  <input type="number" id="drawer-width" value="11.0" step="any" name="drawer-width" min="1"> inches, depth:  <input type="number" id="drawer-depth" value="12.5" step="any" name="drawer-depth" min="1"> inches
       <br>
       <button type="submit" id="submit-btn">Submit</button>
+      <a href="javascript:void(0)" id="get-quote"><h3>QUOTE</h3></a>
       <a href="javascript:void(0)" id="save-page"><h3>SAVE</h3></a>
     </form>
   </div>
