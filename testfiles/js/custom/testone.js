@@ -168,10 +168,25 @@
               var bb = line.getBBox(),
                   rcy = +py2+dy,
                   ly2 = +py2+dy,
-                  mcy = +bb.cy;
-              this.attr({cy: rcy});
-              line.attr({y2: ly2});
-              moveCircle.attr({cy: mcy});
+                  mcy = +bb.cy,
+                  gridUnits = $adminForm.find('#grid-units').val(),
+                  roundTo = gridUnits*10,
+                  roundRcy = roundMultiple(rcy, roundTo),
+                  roundLy2 = roundMultiple(ly2, roundTo),
+                  roundMcy = roundMultiple(mcy, roundTo);
+              if (rcy >= currentDrawerDepth100){
+                this.attr({cy: currentDrawerDepth100});
+                line.attr({y2: currentDrawerDepth100});
+                moveCircle.attr({cy: roundMcy});
+              } else if (rcy <= 0){
+                this.attr({cy: 0});
+                line.attr({y2: 0});
+                moveCircle.attr({cy: roundMcy});
+              } else {
+                this.attr({cy: roundRcy});
+                line.attr({y2: roundLy2});
+                moveCircle.attr({cy: roundMcy});
+              }
             }
 
             //resize on start action
@@ -195,17 +210,36 @@
 
             //resize on move action
             var resizeMove = function(dx,dy) {
-              var bb=line.getBBox();
-              this.attr({cx:+px2+dx});
-              line.attr({x2:+px2+dx});
-              moveCircle.attr({cx:+bb.cx});
+              var bb = line.getBBox(),
+                  rcx = +px2+dx,
+                  lx2 = +px2+dx,
+                  mcx = +bb.cx,
+                  gridUnits = $adminForm.find('#grid-units').val(),
+                  roundTo = gridUnits*10,
+                  roundRcx = roundMultiple(rcx, roundTo),
+                  roundLx2 = roundMultiple(lx2, roundTo),
+                  roundMcx = roundMultiple(mcx, roundTo);
+              if (rcx >= currentDrawerWidth100){
+                this.attr({cx: currentDrawerWidth100});
+                line.attr({x2: currentDrawerWidth100});
+                moveCircle.attr({cx: roundMcx});
+              } else if (rcx <= 0){
+                this.attr({cx: 0});
+                line.attr({x2: 0});
+                moveCircle.attr({cx: roundMcx});
+              } else {
+                this.attr({cx: roundRcx});
+                line.attr({x2: roundLx2});
+                moveCircle.attr({cx: roundMcx});
+              }
             }
 
             //resize on start action
             var resizeStart = function() {
+              var bb=line.getBBox();
               px1 = line.attr("x1");
-              pcx = px1+((px2-px1)/2);
               px2 = line.attr("x2");
+              pcx = bb.cx;
             }
 
             //resize on stop action
@@ -240,44 +274,44 @@
                 roundRcy = roundMultiple(rcy, roundTo);
             if (lx1 <= 0) {
               var lx1Sum = 0-lx1;
-              line.attr({x1:lx1+lx1Sum, y1:ly1, x2:lx2+lx1Sum, y2:ly2});
-              this.attr({cx:mcx+lx1Sum, cy:mcy});
-              resizeCircle.attr({cx:rcx+lx1Sum, cy:rcy});
+              line.attr({x1:lx1+lx1Sum, y1:roundLy1, x2:lx2+lx1Sum, y2:roundLy2});
+              this.attr({cx:mcx+lx1Sum, cy:roundMcy});
+              resizeCircle.attr({cx:rcx+lx1Sum, cy:roundRcy});
             }else if (lx2 > currentDrawerWidth100) {
               var lx2Sum = lx2-currentDrawerWidth100;
-              line.attr({x1:lx1-lx2Sum, y1:ly1, x2:lx2-lx2Sum, y2:ly2});
-              this.attr({cx:mcx-lx2Sum, cy:mcy});
-              resizeCircle.attr({cx:rcx-lx2Sum, cy:rcy});
+              line.attr({x1:lx1-lx2Sum, y1:roundLy1, x2:lx2-lx2Sum, y2:roundLy2});
+              this.attr({cx:mcx-lx2Sum, cy:roundMcy});
+              resizeCircle.attr({cx:rcx-lx2Sum, cy:roundRcy});
             }else if (ly1 < 0) {
               var ly1Sum = 0-ly1;
-              line.attr({x1:lx1, y1:ly1+ly1Sum, x2:lx2, y2:ly2+ly1Sum});
-              this.attr({cx:mcx, cy:mcy+ly1Sum});
-              resizeCircle.attr({cx:rcx, cy:rcy+ly1Sum});
+              line.attr({x1:roundLx1, y1:ly1+ly1Sum, x2:roundLx2, y2:ly2+ly1Sum});
+              this.attr({cx:roundMcx, cy:mcy+ly1Sum});
+              resizeCircle.attr({cx:roundRcx, cy:rcy+ly1Sum});
             }else if (ly2 > currentDrawerDepth100) {
               var ly2Sum = ly2-currentDrawerDepth100;
-              line.attr({x1:lx1, y1:ly1-ly2Sum, x2:lx2, y2:ly2-ly2Sum});
-              this.attr({cx:mcx, cy:mcy-ly2Sum});
-              resizeCircle.attr({cx:rcx, cy:rcy-ly2Sum});
+              line.attr({x1:roundLx1, y1:ly1-ly2Sum, x2:roundLx2, y2:ly2-ly2Sum});
+              this.attr({cx:roundMcx, cy:mcy-ly2Sum});
+              resizeCircle.attr({cx:roundRcx, cy:rcy-ly2Sum});
             }else if (lx2 < 0) {
               var lx2Sum = 0-lx2;
-              line.attr({x1:lx1+lx2Sum, y1:ly1, x2:lx2+lx2Sum, y2:ly2});
-              this.attr({cx:mcx+lx2Sum, cy:mcy});
-              resizeCircle.attr({cx:rcx+lx2Sum, cy:rcy});
+              line.attr({x1:lx1+lx2Sum, y1:roundLy1, x2:lx2+lx2Sum, y2:roundLy2});
+              this.attr({cx:mcx+lx2Sum, cy:roundMcy});
+              resizeCircle.attr({cx:rcx+lx2Sum, cy:roundRcy});
             }else if (lx1 > currentDrawerWidth100) {
               var lx1Sum = lx1-currentDrawerWidth100;
-              line.attr({x1:lx1-lx1Sum, y1:ly1, x2:lx2-lx1Sum, y2:ly2});
-              this.attr({cx:mcx-lx1Sum, cy:mcy});
-              resizeCircle.attr({cx:rcx-lx1Sum, cy:rcy});
+              line.attr({x1:lx1-lx1Sum, y1:roundLy1, x2:lx2-lx1Sum, y2:roundLy2});
+              this.attr({cx:mcx-lx1Sum, cy:roundMcy});
+              resizeCircle.attr({cx:rcx-lx1Sum, cy:roundRcy});
             }else if (ly2 < 0) {
               var ly2Sum = 0-ly2;
-              line.attr({x1:lx1, y1:ly1+ly2Sum, x2:lx2, y2:ly2+ly2Sum});
-              this.attr({cx:mcx, cy:mcy+ly2Sum});
-              resizeCircle.attr({cx:rcx, cy:rcy+ly2Sum});
+              line.attr({x1:roundLx1, y1:ly1+ly2Sum, x2:roundLx2, y2:ly2+ly2Sum});
+              this.attr({cx:roundMcx, cy:mcy+ly2Sum});
+              resizeCircle.attr({cx:roundRcx, cy:rcy+ly2Sum});
             }else if (ly1 > currentDrawerDepth100) {
               var ly1Sum = ly1-currentDrawerDepth100;
-              line.attr({x1:lx1, y1:ly1-ly1Sum, x2:lx2, y2:ly2-ly1Sum});
-              this.attr({cx:mcx, cy:mcy-ly1Sum});
-              resizeCircle.attr({cx:rcx, cy:rcy-ly1Sum});
+              line.attr({x1:roundLx1, y1:ly1-ly1Sum, x2:roundLx2, y2:ly2-ly2Sum});
+              this.attr({cx:roundMcx, cy:mcy-ly1Sum});
+              resizeCircle.attr({cx:roundRcx, cy:rcy-ly1Sum});
             }else{
               line.attr({x1:roundLx1, y1:roundLy1, x2:roundLx2, y2:roundLy2});
               this.attr({cx:roundMcx, cy:roundMcy});
@@ -428,9 +462,12 @@
     var currentDrawerWidth = $userForm.find('#drawer-width').val(),
       currentDrawerDepth = $userForm.find('#drawer-depth').val(),
       currentDrawerWidth100 = currentDrawerWidth*100,
-      currentDrawerDepth100= currentDrawerDepth*100;
-    var v = roundTo;
-    var h = roundTo;
+      currentDrawerDepth100= currentDrawerDepth*100,
+      gridUnits = $adminForm.find('#grid-units').val(),
+      currentRoundTo = gridUnits*10;
+
+    var v = currentRoundTo;
+    var h = currentRoundTo;
     while (v < currentDrawerWidth100) {
       var x1 =v,
           x2 = v,
@@ -445,7 +482,7 @@
           strokeDashoffset: 50,
           class: 'vert-bck-path'
         });
-      v=v+roundTo;
+      v=v+currentRoundTo;
     }
     while (h < currentDrawerDepth100) {
       var x1 =0,
@@ -461,7 +498,7 @@
           strokeDashoffset: 50,
           class: 'horiz-bck-path'
         });
-      h=h+roundTo;
+      h=h+currentRoundTo;
     }
   }
 
@@ -555,8 +592,8 @@
 
 
   //admin form submit action
-  $(document).on('submit', '#admin-form', function(event) {
-
+  $('#admin-form').submit(function(event) {
+    event.preventDefault();
     $('#drawing path').remove();
     //draw background grid
     bckGrid();
