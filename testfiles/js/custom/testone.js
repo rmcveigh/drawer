@@ -83,50 +83,6 @@
   //draw outer wall (function below)
   buildOuterwall("outerWall");
 
-  //drag plugin
-  (function() {
-
-    Snap.plugin( function( Snap, Element, Paper, global ) {
-
-      Element.prototype.limitDrag = function( params ) {
-        this.data('minx', params.minx ); this.data('miny', params.miny );
-        this.data('maxx', params.maxx ); this.data('maxy', params.maxy );
-        this.data('x', params.x );    this.data('y', params.y );
-        this.data('ibb', this.getBBox() );
-        this.data('ot', this.transform().local );
-        this.drag( limitMoveDrag, limitStartDrag );
-        return this;
-      };
-
-      function limitMoveDrag( dx, dy ) {
-        var tdx, tdy;
-        var sInvMatrix = this.transform().globalMatrix.invert();
-            sInvMatrix.e = sInvMatrix.f = 0;
-        var tdx = sInvMatrix.x( dx,dy ); tdy = sInvMatrix.y( dx,dy ),
-            gridUnits = $adminForm.find('#grid-units').val(),
-            roundTo = gridUnits*10,
-            currentX = +this.data('ox') + tdx,
-            currentY = +this.data('oy') + tdy,
-            currentXrounded = roundMultiple(currentX, roundTo),
-            currentYrounded = roundMultiple(currentY, roundTo);
-
-        this.data('x', currentXrounded);
-        this.data('y', currentYrounded);
-        if( this.data('x') > this.data('maxx') - this.data('ibb').width  )
-          { this.data('x', this.data('maxx') - this.data('ibb').width  ) };
-        if( this.data('y') > this.data('maxy') - this.data('ibb').height )
-          { this.data('y', this.data('maxy') - this.data('ibb').height ) };
-        if( this.data('x') < this.data('minx') ) { this.data('x', this.data('minx') ) };
-        if( this.data('y') < this.data('miny') ) { this.data('y', this.data('miny') ) };
-        this.transform( this.data('ot') + "t" + [ this.data('x'), this.data('y') ]  );
-      };
-
-      function limitStartDrag( x, y, ev ) {
-        this.data('ox', this.data('x')); this.data('oy', this.data('y'));
-      };
-    });
-  })();
-
   (function() {
     Snap.plugin(function( Snap, Element, Paper, global ) {
       Element.prototype.addHandles = function( params ) {
@@ -371,21 +327,7 @@
           strokeWidth: 4,
           "fill-opacity": "0"
         });
-        if (x1==x2) {
-          var minxDragPoint = 0-x1,
-            minyDragPoint = 0-y1,
-            maxxDragPoint = currentDrawerWidth100-x2,
-            maxyDragPoint = currentDrawerDepth100-y1;
-            p.addHandles();
-          // p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
-        }else{
-          var minxDragPoint = 0-x1,
-            minyDragPoint = 0-y1,
-            maxxDragPoint = currentDrawerWidth100-x1,
-            maxyDragPoint = currentDrawerDepth100-y2;
-            p.addHandles();
-          // p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
-        }
+        p.addHandles();
       });
     });
   };
@@ -403,29 +345,19 @@
         var x1 = (path.x1)*currentDrawerWidth100,
           y1 = (path.y1)*currentDrawerDepth100,
           x2 = (path.x2)*currentDrawerWidth100,
-          y2 = (path.y2)*currentDrawerDepth100;
+          y2 = (path.y2)*currentDrawerDepth100,
+          roundX1 = roundMultiple(x1, roundTo),
+          roundY1 = roundMultiple(y1, roundTo),
+          roundX2 = roundMultiple(x2, roundTo),
+          roundY2 = roundMultiple(y2, roundTo);
         var p = s.line(
-          x1, y1, x2, y2
+          roundX1, roundY1, roundX2, roundY2
         ).attr({
           stroke: "#000",
           strokeWidth: 4,
           "fill-opacity": "0"
         });
-        if (x1==x2) {
-          var minxDragPoint = 0-x1,
-            minyDragPoint = 0-y1,
-            maxxDragPoint = currentDrawerWidth100-x2,
-            maxyDragPoint = currentDrawerDepth100-y1;
-            p.addHandles();
-          // p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
-        }else{
-          var minxDragPoint = 0-x1,
-            minyDragPoint = 0-y1,
-            maxxDragPoint = currentDrawerWidth100-x1,
-            maxyDragPoint = currentDrawerDepth100-y2;
-            p.addHandles();
-          // p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
-        }
+        p.addHandles();
       });
     });
   }
@@ -618,7 +550,6 @@
         stroke: "#000",
         strokeWidth: 4
     });
-    // p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
     p.addHandles();
   });
 
@@ -643,7 +574,6 @@
         strokeWidth: 4
     });
     p.addHandles();
-    // p.limitDrag({ x: 0, y: 0, minx: minxDragPoint, miny: minyDragPoint, maxx: maxxDragPoint, maxy: maxyDragPoint});
   });
 
 
