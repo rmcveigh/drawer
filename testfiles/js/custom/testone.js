@@ -56,16 +56,29 @@
   var svgElement = document.getElementById("drawing");
   var s = Snap(svgElement);
 
+  //create background image
+
+  var svgBckElement = document.getElementById("background-drawing");
+
   //style canvas
   s.attr({ viewBox: "0 0 "+canvasWidth100 +" "+ canvasHeight100});
 
   //style div
+  $('#background-drawing').css({
+    width: canvasWidthPx,
+    height: canvasHeightPx
+  });
+
+  //style div
   $('#drawing').css({
-      width: canvasWidthPx,
-      height: canvasHeightPx,
-      background: '#eee',
-      border: 'solid #aaa 1px'
-    });
+    width: canvasWidthPx,
+    height: canvasHeightPx,
+    background: '#eee',
+    border: 'solid #aaa 1px'
+  });
+
+  //draw grid (function below)
+  bckGrid();
 
   //draw outer wall (function below)
   buildOuterwall("outerWall");
@@ -409,6 +422,49 @@
     });
   }
 
+  // create Background Grid
+  function bckGrid(){
+    //current drawer vars
+    var currentDrawerWidth = $userForm.find('#drawer-width').val(),
+      currentDrawerDepth = $userForm.find('#drawer-depth').val(),
+      currentDrawerWidth100 = currentDrawerWidth*100,
+      currentDrawerDepth100= currentDrawerDepth*100;
+    var v = roundTo;
+    var h = roundTo;
+    while (v < currentDrawerWidth100) {
+      var x1 =v,
+          x2 = v,
+          y1 = 0,
+          y2 = currentDrawerDepth100;
+      var bckP = s.path(
+        "M "+x1+" "+y1+" L " +x2+ " "+y2
+        ).attr({
+          stroke: '#ccc',
+          strokeWidth: 1,
+          strokeDasharray: "10 5",
+          strokeDashoffset: 50,
+          class: 'vert-bck-path'
+        });
+      v=v+roundTo;
+    }
+    while (h < currentDrawerDepth100) {
+      var x1 =0,
+          x2 = currentDrawerWidth100,
+          y1 = h,
+          y2 = h;
+      var bckP = s.path(
+        "M "+x1+" "+y1+" L " +x2+ " "+y2
+        ).attr({
+          stroke: '#ccc',
+          strokeWidth: 1,
+          strokeDasharray: "10 5",
+          strokeDashoffset: 50,
+          class: 'horiz-bck-path'
+        });
+      h=h+roundTo;
+    }
+  }
+
   //template image link.
   //get json based on click.
   // $(document).on('click', '.template-image-link', function(event) {
@@ -451,6 +507,9 @@
     //clear canvas
     s.clear();
 
+    //draw background grid
+    bckGrid();
+
     //get json and draw
     getFlexableTemplate(thisId);
 
@@ -478,6 +537,9 @@
     //clear canvas
     s.clear();
 
+    //draw background grid
+    bckGrid();
+
     //draw outer wall
     buildOuterwall("outerWall");
 
@@ -488,6 +550,16 @@
         getFlexableTemplate(thisId);
       };
     });
+
+  });
+
+
+  //admin form submit action
+  $(document).on('submit', '#admin-form', function(event) {
+
+    $('#drawing path').remove();
+    //draw background grid
+    bckGrid();
 
   });
 
@@ -566,6 +638,10 @@
         "Fit into drawer": function() {
           //clear canvas
           s.clear();
+
+          //draw background grid
+          bckGrid();
+
           var thisId = $('.template-image-link.selected').attr('id');
           //get json and draw
           getFlexableTemplate(thisId);
@@ -575,6 +651,10 @@
         "Place above": function() {
           //clear canvas
           s.clear();
+
+          //draw background grid
+          bckGrid();
+
           var thisId = $('.template-image-link.selected').attr('id');
           //get json and draw
           getFixedTemplate(thisId);
@@ -601,6 +681,10 @@
               $thisLink.removeClass('selected')
             };
           });
+
+          //draw background grid
+          bckGrid();
+
           //draw outer wall
           buildOuterwall("outerWall");
 
