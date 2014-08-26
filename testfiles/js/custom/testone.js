@@ -7,6 +7,7 @@
       productBasePrice = $adminForm.find('#product-base-price').val(),
       pricePerPound = $adminForm.find('#price-per-pound').val(),
       shippingBasePrice = $adminForm.find('#shipping-base-price').val(),
+      weightPerInch = $adminForm.find('weight-per-inch').val,
       overlapJointClearance = $adminForm.find('#overlap-clearance').val(),
       kerfClearance = $adminForm.find('#kerf-clearance').val(),
       gridUnits = $adminForm.find('#grid-units').val(),
@@ -620,6 +621,7 @@
       productBasePrice = $adminForm.find('#product-base-price').val(),
       pricePerPound = $adminForm.find('#price-per-pound').val(),
       shippingBasePrice = $adminForm.find('#shipping-base-price').val(),
+      weightPerInch = $adminForm.find('weight-per-inch').val,
       overlapJointClearance = $adminForm.find('#overlap-clearance').val(),
       kerfClearance = $adminForm.find('#kerf-clearance').val(),
       gridUnits = $adminForm.find('#grid-units').val(),
@@ -729,11 +731,12 @@
 
     //admin vars
     var $adminForm = $('#admin-form'),
-      thickness = $adminForm.find('#material-thickness').val(),
-      pricePerInch = $adminForm.find('#price-per-inch').val(),
-      productBasePrice = $adminForm.find('#product-base-price').val(),
-      pricePerPound = $adminForm.find('#price-per-pound').val(),
-      shippingBasePrice = $adminForm.find('#shipping-base-price').val();
+        thickness = $adminForm.find('#material-thickness').val(),
+        pricePerInch = $adminForm.find('#price-per-inch').val(),
+        productBasePrice = $adminForm.find('#product-base-price').val(),
+        pricePerPound = $adminForm.find('#price-per-pound').val(),
+        weightPerInch = $adminForm.find('#weight-per-inch').val(),
+        shippingBasePrice = $adminForm.find('#shipping-base-price').val();
 
     var productL = 0; //product length
 
@@ -743,13 +746,22 @@
       var thisHeight = bb.height/100; //current height
       var thisL = thisWidth+thisHeight;
       productL = thisL+productL;
-      console.log(bb);
     });
 
-    var productSA = productL*currentDrawerHeight;
-    var currentPrice = pricePerInch*productSA
-    var productPrice = currentPrice+productBasePrice;
-    alert('Current Product Price = '+productPrice);
+    //product price
+    var baseSA = parseFloat(currentDrawerWidth)*parseFloat(currentDrawerDepth);
+    var productSA = (productL+baseSA)*parseFloat(currentDrawerHeight);
+    var currentProductPrice = productSA*parseFloat(pricePerInch);
+    var productPrice = currentProductPrice+parseFloat(productBasePrice);
+    var roundedProductPrice = productPrice.toFixed(2);
+
+    var productWeight = productSA*parseFloat(weightPerInch);
+    var shippingCost = productWeight*parseFloat(pricePerPound);
+    var totalShipping = shippingCost+parseFloat(shippingBasePrice);
+    var roundedShippingPrice = totalShipping.toFixed(2);
+
+    alert('Current Product Price = $' + roundedProductPrice+'. Current Shipping Price = $'+ roundedShippingPrice);
+
   });
 
   //create template dialog
