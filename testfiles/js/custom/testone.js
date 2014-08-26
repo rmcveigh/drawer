@@ -30,7 +30,8 @@
       canvasHeightPx = canvasHeight100+"px";
 
   /*ui variables */
-  var handleSize = 7;
+  var handleSize = 8;
+  var tempJson;
 
   //nearest multiple function used to acheive snap to grid functionality
   function roundMultiple(num, multiple) {
@@ -102,6 +103,10 @@
           currentDrawerWidth100 = currentDrawerWidth*100,
           currentDrawerDepth100= currentDrawerDepth*100;
 
+        $('#drawing .move-scale').each(function(index, el) {
+          $(this).removeClass('move-scale');
+        });
+
         //check if the it is an outer line
         if (
             (px1==0 && px2==currentDrawerWidth100 && py1==0 && py2==0)
@@ -115,6 +120,7 @@
           //create handles
           var resizeCircle = s.circle(bb.x2,bb.y2,handleSize).attr({fill:"red"});
           var moveCircle = s.circle(bb.cx,bb.cy,handleSize).attr({fill:"red"});
+          line.attr({class: 'move-scale'});
 
           if (px2 == px1) {
             //if line is vertical
@@ -350,16 +356,28 @@
           roundY1 = roundMultiple(y1, roundTo),
           roundX2 = roundMultiple(x2, roundTo),
           roundY2 = roundMultiple(y2, roundTo);
-        var p = s.line(
-          roundX1, roundY1, roundX2, roundY2
-        ).attr({
-          stroke: "#000",
-          strokeWidth: 4,
-          "fill-opacity": "0"
-        });
-        p.addHandles();
-      });
-    });
+        //draw outer wall
+        buildOuterwall("outerWall");
+        if (
+            (x1==0 && x2==currentDrawerWidth100 && y1==0 && y2==0)
+            ||(x1==0 && x2==0 && y1==currentDrawerDepth100 && y2==0)
+            ||(x1==currentDrawerWidth100 && x2==currentDrawerWidth100 && y1==0 && y2==currentDrawerDepth100)
+            ||(x1==currentDrawerWidth100 && x2==0 && y1==currentDrawerDepth100 && y2==currentDrawerDepth100)
+          ) {
+        }else{
+          var p = s.line(
+            roundX1, roundY1, roundX2, roundY2
+          ).attr({
+            stroke: "#000",
+            strokeWidth: 4,
+            "fill-opacity": "0"
+          });
+
+          p.addHandles();
+        }
+
+      });//end each
+    });//end getJSON
   }
 
   //build outer wall (could change to hard code if json can't be pulled in)
@@ -541,10 +559,7 @@
     var halfDrawerWidth = currentDrawerWidth100/2;
     var halfDrawerDepth = currentDrawerDepth100/2;
     var quarterDrawerDepth = currentDrawerDepth100/4;
-    var minxDragPoint = 0-(currentDrawerWidth100*0.25),
-      minyDragPoint = 0-halfDrawerDepth,
-      maxxDragPoint = currentDrawerWidth100-(currentDrawerWidth100*0.25),
-      maxyDragPoint = currentDrawerDepth100-halfDrawerDepth;
+
     var p = s.line(currentDrawerWidth100*0.25, halfDrawerDepth, currentDrawerWidth100*0.75, halfDrawerDepth);
     p.attr({
         stroke: "#000",
@@ -556,19 +571,18 @@
   //create vertical line
   $('#vertical-line').click(function(event) {
     var currentDrawerWidth = $userForm.find('#drawer-width').val(),
-      currentDrawerDepth = $userForm.find('#drawer-depth').val(),
-      currentDrawerWidth100 = currentDrawerWidth*100,
-      currentDrawerDepth100= currentDrawerDepth*100;
-    var halfDrawerWidth = currentDrawerWidth100/2;
-    var halfDrawerDepth = currentDrawerDepth100/2;
-    var quarterDrawerDepth = currentDrawerDepth100*0.25;
-    var threequarterDrawerDepth = currentDrawerDepth100*0.75;
-    var minxDragPoint = 0-halfDrawerWidth,
-      minyDragPoint = 0-quarterDrawerDepth,
-      maxxDragPoint = halfDrawerWidth,
-      maxyDragPoint = threequarterDrawerDepth;
+        currentDrawerDepth = $userForm.find('#drawer-depth').val(),
+        currentDrawerWidth100 = currentDrawerWidth*100,
+        currentDrawerDepth100= currentDrawerDepth*100,
+        halfDrawerWidth = currentDrawerWidth100/2,
+        halfDrawerDepth = currentDrawerDepth100/2,
+        quarterDrawerDepth = currentDrawerDepth100*0.25,
+        threequarterDrawerDepth = currentDrawerDepth100*0.75;
+
     var circleRadius = 10;
+
     var p = s.line(halfDrawerWidth, quarterDrawerDepth, halfDrawerWidth, threequarterDrawerDepth);
+
     p.attr({
         stroke: "#000",
         strokeWidth: 4
@@ -583,15 +597,21 @@
     var a= [],
       points="",
       paths = "";
+      //current drawer vars
+      var currentDrawerWidth = $userForm.find('#drawer-width').val(),
+        currentDrawerDepth = $userForm.find('#drawer-depth').val(),
+        currentDrawerWidth100 = currentDrawerWidth*100,
+        currentDrawerDepth100= currentDrawerDepth*100;
     $('svg line').each(function(index, el) {
       var x1 = $(this).attr('x1'),
         y1 = $(this).attr('y1'),
         x2 = $(this).attr('x2'),
         y2 = $(this).attr('y2');
-      points+='{"x1": '+x1+', "y1": '+y1+', "x2": '+x2+', "y2": '+y2+'}';
+      points+='{"x1": '+x1/currentDrawerWidth100+', "y1": '+y1/currentDrawerDepth100+', "x2": '+x2/currentDrawerWidth100+', "y2": '+y2/currentDrawerDepth100+'}';
     });
     var json='{ "paths": [ ' + points.replace(/\}{/g, '}, {') + " ] }";
-    alert("Just saved this json: "+json);
+    console.log(json);
+    alert("Saved! Check out the console for json file");
   });
 
   //create template dialog
