@@ -1,5 +1,5 @@
 html, body, #drawing {
-    margin: 0 auto;
+    margin: 0 auto 5em;
     height: 90%;
     width: 90%;
 }
@@ -9,14 +9,17 @@ form {
   padding: 1em;
 }
 
-#admin-form {
+#admin-settings {
   display: none;
 }
 
+#templates {
+  display: none;
+}
 #templates li{
   display: inline;
 }
 .template-image {
-  max-width: 24%;
-  height: auto;
+  width: auto;
+  max-height: 130px;
 }

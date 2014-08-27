@@ -35,9 +35,10 @@
       canvasHeightPx = canvasHeight100+"px";
 
   /*ui variables */
-  var handleSize = 8;
+  var handleSize = 12;
   var tempJson;
   var lineThickness = parseInt((thickness*10)*2);
+  var tempJson = "";
 
   //nearest multiple function used to acheive snap to grid functionality
   function roundMultiple(num, multiple) {
@@ -58,18 +59,41 @@
     max: maxDepth
   });
 
-  //show admin form
-  $(document).on('click', '#admin-form-link', function(event) {
+  //show tab
+  $(document).on('click', 'header .tab', function(event) {
     event.preventDefault();
-    $('#admin-form').slideToggle();
-    var $thisLink = $(this);
-    if ($thisLink.hasClass('closed')) {
-      $thisLink.attr('class', 'opened')
-        .text('Hide Form');
-    }else if ($thisLink.hasClass('opened')) {
-      $thisLink.attr('class', 'closed')
-        .text('Show Form');
-    }
+    var $thisTab = $(this),
+        thisText = $thisTab.text(),
+        thisId = $thisTab.attr('id'),
+        tabClass = '.'+thisId;
+    if (thisText == 'Load Template') {
+      $thisTab.text('Hide Templates').addClass('close-btn').removeClass('closed');
+      $('#templates').slideDown();
+    }else if (thisText == 'Admin Form') {
+      $thisTab.text('Hide Form').addClass('close-btn').removeClass('closed');
+      $('#admin-settings').slideDown();
+    }else if (thisText == 'Hide Templates') {
+      $thisTab.text('Load Template').addClass('closed').removeClass('close-btn');
+      $('#templates').slideUp();
+    }else if (thisText == 'Hide Form') {
+      $thisTab.text('Admin Form').addClass('closed').removeClass('close-btn');
+      $('#admin-settings').slideUp();
+    };
+  });
+
+  //close button
+  $(document).on('click', '.close-btn', function(event) {
+    event.preventDefault();
+    $('header .close-btn').each(function(index, el) {
+      $(this).addClass('closed').removeClass('close-btn');
+      if ($(this).text()=="Hide Form") {
+        $(this).text('Admin Form');
+         $('#admin-settings').slideUp();
+      }else if ($(this).text()=="Hide Templates") {
+        $(this).text('Load Template');
+         $('#templates').slideUp();
+      };
+    });
   });
 
   //create canvas
@@ -105,6 +129,17 @@
   buildOuterwall("outerWall");
 
   (function() {
+
+    Snap.plugin(function (Snap, Element, Paper, glob) {
+      var elproto = Element.prototype;
+      elproto.toFront = function () {
+          this.prependTo(this.paper);
+      };
+      elproto.toBack = function () {
+          this.appendTo(this.paper);
+      };
+    });
+
     Snap.plugin(function( Snap, Element, Paper, global ) {
       Element.prototype.addHandles = function( params ) {
         //primary vars
@@ -138,8 +173,8 @@
           //if it isn't an outer line:
 
           //create handles
-          var resizeCircle = s.circle(bb.x2,bb.y2,handleSize).attr({fill:"red"});
-          var moveCircle = s.circle(bb.cx,bb.cy,handleSize).attr({fill:"red"});
+          var resizeCircle = s.circle(bb.x2,bb.y2,handleSize).attr({fill:"#666", stroke: "#999"});
+          var moveCircle = s.circle(bb.cx,bb.cy,handleSize).attr({fill:"#666", stroke: "#999"});
           line.attr({class: 'move-scale'});
 
           if (px2 == px1) {
@@ -177,6 +212,16 @@
               py1 = line.attr("y1");
               py2 = line.attr("y2");
               pcy = bb.cy;
+              $('#drawing .deletable').each(function(index, el) {
+                $(this).attr({class: 'move-scale', stroke: "#999", fill: "#666"});
+              }).promise().done(function(){
+                line.attr({class: 'deletable move-scale', stroke: "red"});
+                moveCircle.attr({class: 'deletable', fill: 'red'});
+                resizeCircle.attr({class: 'deletable', fill: 'red'});
+              });
+              line.toBack();
+              moveCircle.toBack();
+              resizeCircle.toBack();
             }
 
             //resize on stop action
@@ -222,6 +267,16 @@
               px1 = line.attr("x1");
               px2 = line.attr("x2");
               pcx = bb.cx;
+              $('#drawing .deletable').each(function(index, el) {
+                $(this).attr({class: 'move-scale', stroke: "#999", fill: "#666"});
+              }).promise().done(function(){
+                line.attr({class: 'deletable move-scale', stroke: "red"});
+                moveCircle.attr({class: 'deletable', fill: 'red'});
+                resizeCircle.attr({class: 'deletable', fill: 'red'});
+              });
+              line.toBack();
+              moveCircle.toBack();
+              resizeCircle.toBack();
             }
 
             //resize on stop action
@@ -311,12 +366,15 @@
             pcx = bb.cx;
             pcy = bb.cy;
             $('#drawing .deletable').each(function(index, el) {
-              $(this).attr({stroke: "#000", class: 'move-scale'});
+              $(this).attr({stroke: "#999", class: 'move-scale', fill: "#666"});
             }).promise().done(function(){
-              line.attr({class: 'deletable move-scale', stroke: "#777"});
-              moveCircle.attr({class: 'deletable'});
-              resizeCircle.attr({class: 'deletable'});
+              line.attr({class: 'deletable move-scale', stroke: "red"});
+              moveCircle.attr({class: 'deletable', fill:"red"});
+              resizeCircle.attr({class: 'deletable', fill: "red"});
             });
+            line.toBack();
+            moveCircle.toBack();
+            resizeCircle.toBack();
           }
 
           //move on stop action
@@ -327,11 +385,49 @@
           moveCircle.drag(moveMove, moveStart, moveStop);
 
         }//end outer line else
-
+        canvasJson();
       };//end addHandles Function
     });
   })();
 
+  function canvasJson(){
+    var a= [],
+      points="",
+      paths = "";
+      //current drawer vars
+      var currentDrawerWidth = $userForm.find('#drawer-width').val(),
+        currentDrawerDepth = $userForm.find('#drawer-depth').val(),
+        currentDrawerWidth100 = parseFloat(currentDrawerWidth)*100,
+        currentDrawerDepth100= parseFloat(currentDrawerDepth)*100;
+    $('svg line').each(function(index, el) {
+      var x1 = $(this).attr('x1'),
+        y1 = $(this).attr('y1'),
+        x2 = $(this).attr('x2'),
+        y2 = $(this).attr('y2');
+      points+='{"x1": '+x1/currentDrawerWidth100+', "y1": '+y1/currentDrawerDepth100+', "x2": '+x2/currentDrawerWidth100+', "y2": '+y2/currentDrawerDepth100+'}';
+    });
+    var json='{ "paths": [ ' + points.replace(/\}{/g, '}, {') + " ] }";
+    tempJson=json;
+    console.log(json);
+  }
+
+  // opens dialog then deletes line
+  $('#delete-line').click(function(event) {
+    event.preventDefault();
+      if ($('#drawing .deletable').length) {
+        $( "#delete-line-dialog" ).dialog( "open" );
+      }
+  });
+
+  //delete key action
+  $('html').keyup(function(e){
+    if(e.keyCode == 46 || e.KeyCode == 8){
+      e.preventDefault();
+      if ($('#drawing .deletable').length) {
+        $('#delete-line-dialog').dialog( "open" );
+      };
+    }
+  });
 
   // opens dialog then clears the canvas
   $('#clear-btn').click(function(event) {
@@ -339,13 +435,54 @@
     $( "#clear-canvas-dialog" ).dialog( "open" );
   });
 
+  // preview drawer
+  $(document).on('click', '#preview-link.visable',function(event) {
+    event.preventDefault();
+      $('#drawing path, #drawing circle').hide();
+      $(this).addClass('hidden').removeClass('visable').text('Edit');
+  });
+
+  // edit drawer
+  $(document).on('click', '#preview-link.hidden',function(event) {
+    event.preventDefault();
+      $('#drawing path, #drawing circle').show();
+      $(this).addClass('visable').removeClass('hidden').text('Preview');
+  });
+
+  //deselect action
+  $('svg').mousedown(function (evt) {
+    if(evt.target == $('svg')[0]) {
+      $('#drawing .deletable').each(function(index, el) {
+        $(this).attr({stroke: "#999", class: 'move-scale', fill: "#666"});
+      });
+    }
+  });
+
+  //line click event
+  $(document).on('click', '#drawing line', function(event) {
+    event.preventDefault();
+    var $thisLine = $(this);
+    var $dragHandle = $thisLine.next('circle');
+    var $moveHandle = $dragHandle.next('circle');
+    $('#drawing .deletable').each(function(index, el) {
+      $(this).attr({class: 'move-scale', stroke: "#999", fill: "#666"});
+    }).promise().done(function(){
+      $thisLine.attr({class: 'deletable move-scale', stroke: "red"})
+        .appendTo('#drawing');
+      $dragHandle.attr({class: 'deletable', fill: 'red'})
+        .appendTo('#drawing');
+      $moveHandle.attr({class: 'deletable', fill: 'red'})
+        .appendTo('#drawing');
+    });
+  });
+
   //function that outputs Template (NON-FLEXIBLY) from orig json file.
   function getFixedTemplate(jsonFile){
     var jsonPath = "json/"+jsonFile+"Length.json",
       currentDrawerWidth = $userForm.find('#drawer-width').val(),
       currentDrawerDepth = $userForm.find('#drawer-depth').val(),
-      currentDrawerWidth100 = currentDrawerWidth*100,
-      currentDrawerDepth100= currentDrawerDepth*100;
+      currentDrawerWidth100 = parseFloat(currentDrawerWidth)*100,
+      currentDrawerDepth100= parseFloat(currentDrawerDepth)*100;
 
     $.getJSON(jsonPath,function(result){
       $.each(result.paths, function(i, path){
@@ -356,7 +493,7 @@
         var p = s.line(
           x1, y1, x2, y2
         ).attr({
-          stroke: "#000",
+          stroke: "#999",
           strokeWidth: lineThickness,
           "fill-opacity": "0"
         });
@@ -370,62 +507,63 @@
     var jsonPath = "json/"+jsonFile+".json",
       currentDrawerWidth = $userForm.find('#drawer-width').val(),
       currentDrawerDepth = $userForm.find('#drawer-depth').val(),
-      currentDrawerWidth100 = currentDrawerWidth*100,
-      currentDrawerDepth100= currentDrawerDepth*100;
+      currentDrawerWidth100 = parseFloat(currentDrawerWidth)*100,
+      currentDrawerDepth100= parseFloat(currentDrawerDepth)*100;
+
+    //draw outer wall
+    buildOuterwall("outerWall");
 
     $.getJSON(jsonPath,function(result){
       $.each(result.paths, function(i, path){
         var x1 = (path.x1)*currentDrawerWidth100,
-          y1 = (path.y1)*currentDrawerDepth100,
-          x2 = (path.x2)*currentDrawerWidth100,
-          y2 = (path.y2)*currentDrawerDepth100,
+          y1 = parseFloat(path.y1)*currentDrawerDepth100,
+          x2 = parseFloat(path.x2)*currentDrawerWidth100,
+          y2 = parseFloat(path.y2)*currentDrawerDepth100,
           roundX1 = roundMultiple(x1, roundTo),
           roundY1 = roundMultiple(y1, roundTo),
           roundX2 = roundMultiple(x2, roundTo),
           roundY2 = roundMultiple(y2, roundTo);
-        //draw outer wall
-        buildOuterwall("outerWall");
         if (
             (x1==0 && x2==currentDrawerWidth100 && y1==0 && y2==0)
             ||(x1==0 && x2==0 && y1==currentDrawerDepth100 && y2==0)
             ||(x1==currentDrawerWidth100 && x2==currentDrawerWidth100 && y1==0 && y2==currentDrawerDepth100)
             ||(x1==currentDrawerWidth100 && x2==0 && y1==currentDrawerDepth100 && y2==currentDrawerDepth100)
           ) {
-        } else if(x1 != 0 && x2 == currentDrawerWidth100){
+        } else if(x1 != 0 && x2 >= currentDrawerWidth100){
           var p = s.line(
             roundX1, roundY1, currentDrawerWidth100, roundY2
           ).attr({
-            stroke: "#000",
+            stroke: "#999",
             strokeWidth: lineThickness,
             "fill-opacity": "0"
           });
 
           p.addHandles();
-        } else if(x1 == 0 && x2 == currentDrawerWidth100){
+        } else if(x1 == 0 && x2 >= currentDrawerWidth100){
           var p = s.line(
             0, roundY1, currentDrawerWidth100, roundY2
           ).attr({
-            stroke: "#000",
+            stroke: "#999",
             strokeWidth: lineThickness,
             "fill-opacity": "0"
           });
 
           p.addHandles();
-        } else if(y1 != 0 && y2 == currentDrawerDepth100){
+        } else if(y1 != 0 && y2 >= currentDrawerDepth100){
           var p = s.line(
             roundX1, roundY1, roundX2, currentDrawerDepth100
           ).attr({
-            stroke: "#000",
+            stroke: "#999",
             strokeWidth: lineThickness,
             "fill-opacity": "0"
           });
 
           p.addHandles();
-        } else if(y1 == 0 && y2 == currentDrawerDepth100){
+        } else if(y1 == 0 && y2 >= currentDrawerDepth100){
           var p = s.line(
             roundX1, 0, roundX2, currentDrawerDepth100
           ).attr({
-            stroke: "#000",
+            stroke: "#999",
             strokeWidth: lineThickness,
             "fill-opacity": "0"
           });
@@ -435,7 +573,7 @@
           var p = s.line(
             roundX1, 0, roundX2, roundY2
           ).attr({
-            stroke: "#000",
+            stroke: "#999",
             strokeWidth: lineThickness,
             "fill-opacity": "0"
           });
@@ -445,7 +583,7 @@
           var p = s.line(
             roundX1, roundY1, roundX2, roundY2
           ).attr({
-            stroke: "#000",
+            stroke: "#999",
             strokeWidth: lineThickness,
             "fill-opacity": "0"
           });
@@ -455,6 +593,96 @@
 
       });//end each
     });//end getJSON
+  }
+
+    //function that outputs Template FLEXIBLY from orig jSon File.
+  function getTempJson() {
+    var currentDrawerWidth = $userForm.find('#drawer-width').val(),
+      currentDrawerDepth = $userForm.find('#drawer-depth').val(),
+      cdw = parseFloat(currentDrawerWidth)*100,
+      cdd= parseFloat(currentDrawerDepth)*100;
+
+    var currentJson= $.parseJSON(tempJson);
+    //draw outer wall
+    buildOuterwall("outerWall");
+    $.each(currentJson.paths, function(i, path) {
+        var x1 = parseFloat(path.x1)*cdw,
+          y1 = parseFloat(path.y1)*cdd,
+          x2 = parseFloat(path.x2)*cdw,
+          y2 = parseFloat(path.y2)*cdd,
+          roundX1 = roundMultiple(x1, roundTo),
+          roundY1 = roundMultiple(y1, roundTo),
+          roundX2 = roundMultiple(x2, roundTo),
+          roundY2 = roundMultiple(y2, roundTo);
+        if (
+            (x1==0 && x2==cdw && y1==0 && y2==0)
+            ||(x1==0 && x2==0 && y1==cdd && y2==0)
+            ||(x1==cdw && x2==cdw && y1==0 && y2==cdd)
+            ||(x1==cdw && x2==0 && y1==cdd && y2==cdd)
+          ) {
+        } else if(x1 != 0 && x2 >= cdw){
+          var p = s.line(
+            roundX1, roundY1, cdw, roundY2
+          ).attr({
+            stroke: "#999",
+            strokeWidth: lineThickness,
+            "fill-opacity": "0"
+          });
+
+          p.addHandles();
+        } else if(x1 == 0 && x2 >= cdw){
+          var p = s.line(
+            0, roundY1, cdw, roundY2
+          ).attr({
+            stroke: "#999",
+            strokeWidth: lineThickness,
+            "fill-opacity": "0"
+          });
+
+          p.addHandles();
+        } else if(y1 != 0 && y2 >= cdd){
+          var p = s.line(
+            roundX1, roundY1, roundX2, cdd
+          ).attr({
+            stroke: "#999",
+            strokeWidth: lineThickness,
+            "fill-opacity": "0"
+          });
+
+          p.addHandles();
+        } else if(y1 == 0 && y2 >= cdd){
+          var p = s.line(
+            roundX1, 0, roundX2, cdd
+          ).attr({
+            stroke: "#999",
+            strokeWidth: lineThickness,
+            "fill-opacity": "0"
+          });
+
+          p.addHandles();
+        } else if(y1 == 0 && y2 != 0){
+          var p = s.line(
+            roundX1, 0, roundX2, roundY2
+          ).attr({
+            stroke: "#999",
+            strokeWidth: lineThickness,
+            "fill-opacity": "0"
+          });
+
+          p.addHandles();
+        }else{
+          var p = s.line(
+            roundX1, roundY1, roundX2, roundY2
+          ).attr({
+            stroke: "#999",
+            strokeWidth: lineThickness,
+            "fill-opacity": "0"
+          });
+
+          p.addHandles();
+        }
+
+      });//end each
   }
 
   //build outer wall (could change to hard code if json can't be pulled in)
@@ -475,7 +703,7 @@
         var p = s.line(
           x1, y1, x2, y2
         ).attr({
-          stroke: "#000",
+          stroke: "#999",
           strokeWidth: lineThickness,
           "fill-opacity": "0"
         });
@@ -577,6 +805,10 @@
     //get json and draw
     getFlexableTemplate(thisId);
 
+    if ($('#preview-link').text()=='Edit') {
+      $('#preview-link').addClass('visable').removeClass('hidden').text('Preview');
+    };
+
   });
 
     /* user-form change actions */
@@ -592,12 +824,14 @@
       canvasWidth100 = drawerWidth*100,
       canvasWidth = canvasWidth100+"px",
       canvasHeight = canvasHeight100+"px";
+
     /* on input change, reset canvas css */
     $('#drawing').css({
       width: canvasWidth,
       height: canvasHeight
     });
     s.attr({ viewBox: "0 0 "+canvasWidth100 +" "+ canvasHeight100});
+
     //clear canvas
     s.clear();
 
@@ -607,13 +841,7 @@
     //draw outer wall
     buildOuterwall("outerWall");
 
-    $('.template-image-link').each(function() {
-      if ($(this).hasClass('selected')) {
-        var thisId = $(this).attr('id');
-        //get json and draw
-        getFlexableTemplate(thisId);
-      };
-    });
+    getTempJson(canvasHeight100, canvasWidth100);
 
   });
 
@@ -679,10 +907,14 @@
 
     var p = s.line(currentDrawerWidth100*0.25, halfDrawerDepth, currentDrawerWidth100*0.75, halfDrawerDepth);
     p.attr({
-        stroke: "#000",
+        stroke: "#999",
         strokeWidth: lineThickness
     });
     p.addHandles();
+    if ($('#preview-link').text()=='Edit') {
+      $('#drawing path, #drawing circle').show();
+      $('#preview-link').addClass('visable').removeClass('hidden').text('Preview');
+    };
   });
 
   //create vertical line
@@ -701,33 +933,21 @@
     var p = s.line(halfDrawerWidth, quarterDrawerDepth, halfDrawerWidth, threequarterDrawerDepth);
 
     p.attr({
-        stroke: "#000",
+        stroke: "#999",
         strokeWidth: lineThickness
     });
     p.addHandles();
+    if ($('#preview-link').text()=='Edit') {
+      $('#drawing path, #drawing circle').show();
+      $('#preview-link').addClass('visable').removeClass('hidden').text('Preview');
+    };
   });
 
 
   //export json in needed format. Exports in Pixels!!!
   $('#save-page').click(function(event) {
     event.preventDefault();
-    var a= [],
-      points="",
-      paths = "";
-      //current drawer vars
-      var currentDrawerWidth = $userForm.find('#drawer-width').val(),
-        currentDrawerDepth = $userForm.find('#drawer-depth').val(),
-        currentDrawerWidth100 = currentDrawerWidth*100,
-        currentDrawerDepth100= currentDrawerDepth*100;
-    $('svg line').each(function(index, el) {
-      var x1 = $(this).attr('x1'),
-        y1 = $(this).attr('y1'),
-        x2 = $(this).attr('x2'),
-        y2 = $(this).attr('y2');
-      points+='{"x1": '+x1/currentDrawerWidth100+', "y1": '+y1/currentDrawerDepth100+', "x2": '+x2/currentDrawerWidth100+', "y2": '+y2/currentDrawerDepth100+'}';
-    });
-    var json='{ "paths": [ ' + points.replace(/\}{/g, '}, {') + " ] }";
-    console.log(json);
+    canvasJson();
     alert("Saved! Check out the console for json file");
   });
 
@@ -773,16 +993,6 @@
 
     alert('Current Product Price = $' + roundedProductPrice+'. Current Shipping Price = $'+ roundedShippingPrice);
 
-  });
-
-  $('html').keyup(function(e){
-    if(e.keyCode == 46 || e.KeyCode == 8){
-      e.preventDefault();
-      if ($('#drawing .deletable').length) {
-        $('#delete-line').dialog( "open" );
-      };
-
-    }
   });
 
   //create template dialog
@@ -854,7 +1064,7 @@
       }
     });
 
-  $( "#delete-line" ).dialog({
+  $( "#delete-line-dialog" ).dialog({
       resizable: false,
       autoOpen: false,
       height:420,
