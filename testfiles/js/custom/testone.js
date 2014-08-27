@@ -37,6 +37,7 @@
   /*ui variables */
   var handleSize = 8;
   var tempJson;
+  var lineThickness = parseInt((thickness*10)*2);
 
   //nearest multiple function used to acheive snap to grid functionality
   function roundMultiple(num, multiple) {
@@ -309,6 +310,13 @@
             py2 = line.attr("y2");
             pcx = bb.cx;
             pcy = bb.cy;
+            $('#drawing .deletable').each(function(index, el) {
+              $(this).attr({stroke: "#000", class: 'move-scale'});
+            }).promise().done(function(){
+              line.attr({class: 'deletable move-scale', stroke: "#777"});
+              moveCircle.attr({class: 'deletable'});
+              resizeCircle.attr({class: 'deletable'});
+            });
           }
 
           //move on stop action
@@ -349,7 +357,7 @@
           x1, y1, x2, y2
         ).attr({
           stroke: "#000",
-          strokeWidth: 4,
+          strokeWidth: lineThickness,
           "fill-opacity": "0"
         });
         p.addHandles();
@@ -388,7 +396,7 @@
             roundX1, roundY1, currentDrawerWidth100, roundY2
           ).attr({
             stroke: "#000",
-            strokeWidth: 4,
+            strokeWidth: lineThickness,
             "fill-opacity": "0"
           });
 
@@ -398,7 +406,7 @@
             0, roundY1, currentDrawerWidth100, roundY2
           ).attr({
             stroke: "#000",
-            strokeWidth: 4,
+            strokeWidth: lineThickness,
             "fill-opacity": "0"
           });
 
@@ -408,7 +416,7 @@
             roundX1, roundY1, roundX2, currentDrawerDepth100
           ).attr({
             stroke: "#000",
-            strokeWidth: 4,
+            strokeWidth: lineThickness,
             "fill-opacity": "0"
           });
 
@@ -418,7 +426,7 @@
             roundX1, 0, roundX2, currentDrawerDepth100
           ).attr({
             stroke: "#000",
-            strokeWidth: 4,
+            strokeWidth: lineThickness,
             "fill-opacity": "0"
           });
 
@@ -428,7 +436,7 @@
             roundX1, 0, roundX2, roundY2
           ).attr({
             stroke: "#000",
-            strokeWidth: 4,
+            strokeWidth: lineThickness,
             "fill-opacity": "0"
           });
 
@@ -438,7 +446,7 @@
             roundX1, roundY1, roundX2, roundY2
           ).attr({
             stroke: "#000",
-            strokeWidth: 4,
+            strokeWidth: lineThickness,
             "fill-opacity": "0"
           });
 
@@ -468,7 +476,7 @@
           x1, y1, x2, y2
         ).attr({
           stroke: "#000",
-          strokeWidth: 4,
+          strokeWidth: lineThickness,
           "fill-opacity": "0"
         });
       });
@@ -634,6 +642,9 @@
       minSegmentLength = $adminForm.find('#min-segment-length').val(),
       roundTo = gridUnits*10;
 
+    lineThickness = parseInt((thickness*10)*2);
+    Snap.selectAll("line").attr({strokeWidth: lineThickness});
+
     //set user form min and max values based on admin form
     $userForm.find('#drawer-height').attr({
       min: minHeight,
@@ -669,7 +680,7 @@
     var p = s.line(currentDrawerWidth100*0.25, halfDrawerDepth, currentDrawerWidth100*0.75, halfDrawerDepth);
     p.attr({
         stroke: "#000",
-        strokeWidth: 4
+        strokeWidth: lineThickness
     });
     p.addHandles();
   });
@@ -691,7 +702,7 @@
 
     p.attr({
         stroke: "#000",
-        strokeWidth: 4
+        strokeWidth: lineThickness
     });
     p.addHandles();
   });
@@ -764,6 +775,16 @@
 
   });
 
+  $('html').keyup(function(e){
+    if(e.keyCode == 46 || e.KeyCode == 8){
+      e.preventDefault();
+      if ($('#drawing .deletable').length) {
+        $('#delete-line').dialog( "open" );
+      };
+
+    }
+  });
+
   //create template dialog
   $( "#template-change-dialog" ).dialog({
       resizable: false,
@@ -824,6 +845,24 @@
 
           //draw outer wall
           buildOuterwall("outerWall");
+
+          $( this ).dialog( "close" );
+        },
+        "Cancel": function() {
+          $( this ).dialog( "close" );
+        }
+      }
+    });
+
+  $( "#delete-line" ).dialog({
+      resizable: false,
+      autoOpen: false,
+      height:420,
+      width:520,
+      modal: true,
+      buttons: {
+        "Yes": function() {
+          $('#drawing .deletable').remove();
 
           $( this ).dialog( "close" );
         },
