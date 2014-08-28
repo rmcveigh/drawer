@@ -59,39 +59,77 @@
     max: maxDepth
   });
 
-  //show tab
-  $(document).on('click', 'header .tab', function(event) {
+  $('input[type=number]').spinner({
+      step: 0.5
+  });
+
+  $(document).on('click', '#template-link', function(event) {
     event.preventDefault();
-    var $thisTab = $(this),
-        thisText = $thisTab.text(),
-        thisId = $thisTab.attr('id'),
-        tabClass = '.'+thisId;
-    if (thisText == 'Load Template') {
-      $thisTab.text('Hide Templates').addClass('close-btn').removeClass('closed');
-      $('#templates').slideDown();
-    }else if (thisText == 'Admin Form') {
-      $thisTab.text('Hide Form').addClass('close-btn').removeClass('closed');
-      $('#admin-settings').slideDown();
-    }else if (thisText == 'Hide Templates') {
-      $thisTab.text('Load Template').addClass('closed').removeClass('close-btn');
-      $('#templates').slideUp();
-    }else if (thisText == 'Hide Form') {
-      $thisTab.text('Admin Form').addClass('closed').removeClass('close-btn');
+    var $thisTab=$(this);
+        $thisLi = $thisTab.closest('li');
+    if ($thisTab.hasClass('closed')) {
+      $('header .opened').each(function(index, el) {
+        $(this).addClass('closed').removeClass('close-btn');
+        if ($(this).text()=="Hide Form") {
+          $(this).text('Admin Form');
+          $('#admin-settings').slideUp();
+          $('.tab-white').addClass('tab-gray').removeClass('tab-white');
+        }else if ($(this).text()=="Hide Templates") {
+          $(this).text('Load Template');
+          $('#templates').slideUp();
+          $('.tab-white').addClass('tab-gray').removeClass('tab-white');
+        };
+      });
+      $thisTab.addClass('opened')
+        .removeClass('closed')
+        .text('Hide Templates');
+      $thisLi.addClass('tab-white')
+        .removeClass('tab-gray');
       $('#admin-settings').slideUp();
-    };
+      $('#templates').slideDown();
+    } else {
+      $thisTab.addClass('closed')
+        .removeClass('opened')
+        .text('Load Template');
+      $thisLi.addClass('tab-gray')
+        .removeClass('tab-white');
+      $('#templates').slideUp();
+    }
+  });
+
+  $(document).on('click', '#admin-form-link', function(event) {
+    event.preventDefault();
+    var $thisTab=$(this);
+        $thisLi = $thisTab.closest('li');
+    if ($thisTab.hasClass('closed')) {
+      $('header .opened').each(function(index, el) {
+        $(this).addClass('closed').removeClass('close-btn');
+        if ($(this).text()=="Hide Templates") {
+          $(this).text('Load Template');
+          $('#templates').slideUp();
+          $('.tab-white').addClass('tab-gray').removeClass('tab-white');
+        };
+      });
+      $thisTab.addClass('opened')
+        .removeClass('closed');
+      $('#templates').slideUp();
+      $('#admin-settings').slideDown();
+    } else {
+      $thisTab.addClass('closed')
+        .removeClass('opened');
+      $('#admin-settings').slideUp();
+    }
   });
 
   //close button
   $(document).on('click', '.close-btn', function(event) {
     event.preventDefault();
-    $('header .close-btn').each(function(index, el) {
+    $('header .opened').each(function(index, el) {
       $(this).addClass('closed').removeClass('close-btn');
-      if ($(this).text()=="Hide Form") {
-        $(this).text('Admin Form');
-         $('#admin-settings').slideUp();
-      }else if ($(this).text()=="Hide Templates") {
+      if ($(this).text()=="Hide Templates") {
         $(this).text('Load Template');
-         $('#templates').slideUp();
+        $('#templates').slideUp();
+        $('.tab-white').addClass('tab-gray').removeClass('tab-white');
       };
     });
   });
@@ -118,8 +156,8 @@
   $('#drawing').css({
     width: canvasWidthPx,
     height: canvasHeightPx,
-    background: '#eee',
-    border: 'solid #aaa 1px'
+    background: '#E0E0E0',
+    border: 'solid #8D8D89 7px'
   });
 
   //draw grid (function below)
@@ -174,6 +212,7 @@
 
           //create handles
           var resizeCircle = s.circle(bb.x2,bb.y2,handleSize).attr({fill:"#666", stroke: "#999"});
+          var resizeCircle1 = s.circle(px1,py1,handleSize).attr({fill:"#666", stroke: "#999"});
           var moveCircle = s.circle(bb.cx,bb.cy,handleSize).attr({fill:"#666", stroke: "#999"});
           line.attr({class: 'move-scale'});
 
@@ -215,21 +254,75 @@
               $('#drawing .deletable').each(function(index, el) {
                 $(this).attr({class: 'move-scale', stroke: "#999", fill: "#666"});
               }).promise().done(function(){
-                line.attr({class: 'deletable move-scale', stroke: "red"});
-                moveCircle.attr({class: 'deletable', fill: 'red'});
-                resizeCircle.attr({class: 'deletable', fill: 'red'});
+                line.attr({class: 'deletable move-scale', stroke: "#AA3018"});
+                moveCircle.attr({class: 'deletable', fill: '#AA3018'});
+                resizeCircle.attr({class: 'deletable', fill: '#AA3018'});
+                resizeCircle1.attr({class: 'deletable', fill: '#AA3018'});
               });
               line.toBack();
               moveCircle.toBack();
               resizeCircle.toBack();
+              resizeCircle1.toBack();
             }
 
             //resize on stop action
             var resizeStop = function() {
             }
 
+            //resize on move action
+            var resize1Move = function(dx,dy) {
+              var bb = line.getBBox(),
+                  rcy = +py1+dy,
+                  ly1 = +py1+dy,
+                  mcy = +bb.cy,
+                  gridUnits = $adminForm.find('#grid-units').val(),
+                  roundTo = gridUnits*10,
+                  roundRcy = roundMultiple(rcy, roundTo),
+                  roundLy1 = roundMultiple(ly1, roundTo),
+                  roundMcy = roundMultiple(mcy, roundTo);
+              if (rcy >= currentDrawerDepth100){
+                this.attr({cy: currentDrawerDepth100});
+                line.attr({y1: currentDrawerDepth100});
+                moveCircle.attr({cy: roundMcy});
+              } else if (rcy <= 0){
+                this.attr({cy: 0});
+                line.attr({y1: 0});
+                moveCircle.attr({cy: roundMcy});
+              } else {
+                this.attr({cy: roundRcy});
+                line.attr({y1: roundLy1});
+                moveCircle.attr({cy: roundMcy});
+              }
+            }
+
+            //resize on start action
+            var resize1Start = function() {
+              var bb=line.getBBox();
+              py1 = line.attr("y1");
+              py2 = line.attr("y2");
+              pcy = bb.cy;
+              $('#drawing .deletable').each(function(index, el) {
+                $(this).attr({class: 'move-scale', stroke: "#999", fill: "#666"});
+              }).promise().done(function(){
+                line.attr({class: 'deletable move-scale', stroke: "#AA3018"});
+                moveCircle.attr({class: 'deletable', fill: '#AA3018'});
+                resizeCircle.attr({class: 'deletable', fill: '#AA3018'});
+                resizeCircle1.attr({class: 'deletable', fill: '#AA3018'});
+              });
+              line.toBack();
+              moveCircle.toBack();
+              resizeCircle.toBack();
+              resizeCircle1.toBack();
+            }
+
+            //resize on stop action
+            var resize1Stop = function() {
+            }
+
             //start resize drag action
             resizeCircle.drag(resizeMove, resizeStart, resizeStop);
+            resizeCircle1.drag(resize1Move, resize1Start, resize1Stop);
+
 
           } else {
 
@@ -270,21 +363,76 @@
               $('#drawing .deletable').each(function(index, el) {
                 $(this).attr({class: 'move-scale', stroke: "#999", fill: "#666"});
               }).promise().done(function(){
-                line.attr({class: 'deletable move-scale', stroke: "red"});
-                moveCircle.attr({class: 'deletable', fill: 'red'});
-                resizeCircle.attr({class: 'deletable', fill: 'red'});
+                line.attr({class: 'deletable move-scale', stroke: "#AA3018"});
+                moveCircle.attr({class: 'deletable', fill: '#AA3018'});
+                resizeCircle.attr({class: 'deletable', fill: '#AA3018'});
+                resizeCircle1.attr({class: 'deletable', fill: '#AA3018'});
               });
               line.toBack();
               moveCircle.toBack();
               resizeCircle.toBack();
+              resizeCircle1.toBack();
             }
 
             //resize on stop action
             var resizeStop = function() {
+              canvasJson();
+            }
+
+            //resize on move action
+            var resize1Move = function(dx,dy) {
+              var bb = line.getBBox(),
+                  rcx = +px1+dx,
+                  lx1 = +px1+dx,
+                  mcx = +bb.cx,
+                  gridUnits = $adminForm.find('#grid-units').val(),
+                  roundTo = gridUnits*10,
+                  roundRcx = roundMultiple(rcx, roundTo),
+                  roundLx1 = roundMultiple(lx1, roundTo),
+                  roundMcx = roundMultiple(mcx, roundTo);
+              if (rcx >= currentDrawerWidth100){
+                this.attr({cx: currentDrawerWidth100});
+                line.attr({x1: currentDrawerWidth100});
+                moveCircle.attr({cx: roundMcx});
+              } else if (rcx <= 0){
+                this.attr({cx: 0});
+                line.attr({x1: 0});
+                moveCircle.attr({cx: roundMcx});
+              } else {
+                this.attr({cx: roundRcx});
+                line.attr({x1: roundLx1});
+                moveCircle.attr({cx: roundMcx});
+              }
+            }
+
+            //resize on start action
+            var resize1Start = function() {
+              var bb=line.getBBox();
+              px1 = line.attr("x1");
+              px2 = line.attr("x2");
+              pcx = bb.cx;
+              $('#drawing .deletable').each(function(index, el) {
+                $(this).attr({class: 'move-scale', stroke: "#999", fill: "#666"});
+              }).promise().done(function(){
+                line.attr({class: 'deletable move-scale', stroke: "#AA3018"});
+                moveCircle.attr({class: 'deletable', fill: '#AA3018'});
+                resizeCircle.attr({class: 'deletable', fill: '#AA3018'});
+                resizeCircle1.attr({class: 'deletable', fill: '#AA3018'});
+              });
+              line.toBack();
+              moveCircle.toBack();
+              resizeCircle.toBack();
+              resizeCircle1.toBack();
+            }
+
+            //resize on stop action
+            var resize1Stop = function() {
+              canvasJson();
             }
 
             //start resize drag action
             resizeCircle.drag(resizeMove, resizeStart, resizeStop);
+            resizeCircle1.drag(resize1Move, resize1Start, resize1Stop);
 
           }//end vertical check else statement
 
@@ -297,6 +445,8 @@
                 ly2 = +py2+dy,
                 mcx = +pcx+dx,
                 mcy = +pcy+dy,
+                rcx1 = +px1+dx,
+                rcy1 = +py1+dy,
                 rcx = +px2+dx,
                 rcy = +py2+dy,
                 gridUnits = $adminForm.find('#grid-units').val(),
@@ -307,52 +457,71 @@
                 roundLy2 = roundMultiple(ly2, roundTo),
                 roundMcx = roundMultiple(mcx, roundTo),
                 roundMcy = roundMultiple(mcy, roundTo),
+                roundRcx1 = roundMultiple(rcx1, roundTo),
+                roundRcy1 = roundMultiple(rcy1, roundTo),
                 roundRcx = roundMultiple(rcx, roundTo),
                 roundRcy = roundMultiple(rcy, roundTo);
             if (lx1 <= 0) {
               var lx1Sum = 0-lx1;
+              var lx2Sum = 0-lx2;
               line.attr({x1:lx1+lx1Sum, y1:roundLy1, x2:lx2+lx1Sum, y2:roundLy2});
               this.attr({cx:mcx+lx1Sum, cy:roundMcy});
               resizeCircle.attr({cx:rcx+lx1Sum, cy:roundRcy});
+              resizeCircle1.attr({cx:rcx1+lx1Sum, cy:roundRcy1});
             }else if (lx2 > currentDrawerWidth100) {
+              var lx1Sum = lx1-currentDrawerWidth100;
               var lx2Sum = lx2-currentDrawerWidth100;
               line.attr({x1:lx1-lx2Sum, y1:roundLy1, x2:lx2-lx2Sum, y2:roundLy2});
               this.attr({cx:mcx-lx2Sum, cy:roundMcy});
               resizeCircle.attr({cx:rcx-lx2Sum, cy:roundRcy});
+              resizeCircle1.attr({cx:rcx1-lx2Sum, cy:roundRcy1});
             }else if (ly1 < 0) {
               var ly1Sum = 0-ly1;
+              var ly2Sum = 0-ly2;
               line.attr({x1:roundLx1, y1:ly1+ly1Sum, x2:roundLx2, y2:ly2+ly1Sum});
               this.attr({cx:roundMcx, cy:mcy+ly1Sum});
               resizeCircle.attr({cx:roundRcx, cy:rcy+ly1Sum});
+              resizeCircle1.attr({cx:roundRcx1, cy:rcy1+ly1Sum});
             }else if (ly2 > currentDrawerDepth100) {
+              var ly1Sum = ly1-currentDrawerDepth100;
               var ly2Sum = ly2-currentDrawerDepth100;
               line.attr({x1:roundLx1, y1:ly1-ly2Sum, x2:roundLx2, y2:ly2-ly2Sum});
               this.attr({cx:roundMcx, cy:mcy-ly2Sum});
               resizeCircle.attr({cx:roundRcx, cy:rcy-ly2Sum});
+              resizeCircle1.attr({cx:roundRcx1, cy:rcy1-ly2Sum});
             }else if (lx2 < 0) {
+              var lx1Sum = 0-lx1;
               var lx2Sum = 0-lx2;
               line.attr({x1:lx1+lx2Sum, y1:roundLy1, x2:lx2+lx2Sum, y2:roundLy2});
               this.attr({cx:mcx+lx2Sum, cy:roundMcy});
               resizeCircle.attr({cx:rcx+lx2Sum, cy:roundRcy});
+              resizeCircle1.attr({cx:rcx1+lx2Sum, cy:roundRcy1});
             }else if (lx1 > currentDrawerWidth100) {
               var lx1Sum = lx1-currentDrawerWidth100;
+              var lx2Sum = lx2-currentDrawerWidth100;
               line.attr({x1:lx1-lx1Sum, y1:roundLy1, x2:lx2-lx1Sum, y2:roundLy2});
               this.attr({cx:mcx-lx1Sum, cy:roundMcy});
               resizeCircle.attr({cx:rcx-lx1Sum, cy:roundRcy});
+              resizeCircle1.attr({cx:rcx1-lx1Sum, cy:roundRcy1});
             }else if (ly2 < 0) {
+              var ly1Sum = 0-ly1;
               var ly2Sum = 0-ly2;
               line.attr({x1:roundLx1, y1:ly1+ly2Sum, x2:roundLx2, y2:ly2+ly2Sum});
               this.attr({cx:roundMcx, cy:mcy+ly2Sum});
               resizeCircle.attr({cx:roundRcx, cy:rcy+ly2Sum});
+              resizeCircle1.attr({cx:roundRcx1, cy:rcy1+ly2Sum});
             }else if (ly1 > currentDrawerDepth100) {
               var ly1Sum = ly1-currentDrawerDepth100;
+              var ly2Sum = ly2-currentDrawerDepth100;
               line.attr({x1:roundLx1, y1:ly1-ly1Sum, x2:roundLx2, y2:ly2-ly2Sum});
               this.attr({cx:roundMcx, cy:mcy-ly1Sum});
               resizeCircle.attr({cx:roundRcx, cy:rcy-ly1Sum});
+              resizeCircle1.attr({cx:roundRcx1, cy:rcy1-ly1Sum});
             }else{
               line.attr({x1:roundLx1, y1:roundLy1, x2:roundLx2, y2:roundLy2});
               this.attr({cx:roundMcx, cy:roundMcy});
               resizeCircle.attr({cx:roundRcx, cy:roundRcy});
+              resizeCircle1.attr({cx:roundRcx1, cy:roundRcy1});
             }
           }
 
@@ -368,17 +537,20 @@
             $('#drawing .deletable').each(function(index, el) {
               $(this).attr({stroke: "#999", class: 'move-scale', fill: "#666"});
             }).promise().done(function(){
-              line.attr({class: 'deletable move-scale', stroke: "red"});
-              moveCircle.attr({class: 'deletable', fill:"red"});
-              resizeCircle.attr({class: 'deletable', fill: "red"});
+              line.attr({class: 'deletable move-scale', stroke: "#AA3018"});
+              moveCircle.attr({class: 'deletable', fill:"#AA3018"});
+              resizeCircle.attr({class: 'deletable', fill: "#AA3018"});
+              resizeCircle1.attr({class: 'deletable', fill: "#AA3018"});
             });
             line.toBack();
             moveCircle.toBack();
             resizeCircle.toBack();
+            resizeCircle1.toBack();
           }
 
           //move on stop action
           var moveStop = function() {
+            canvasJson();
           }
 
           //start move drag action
@@ -464,14 +636,17 @@
     var $thisLine = $(this);
     var $dragHandle = $thisLine.next('circle');
     var $moveHandle = $dragHandle.next('circle');
+    var $dragHandle2 = $moveHandle.next('circle');
     $('#drawing .deletable').each(function(index, el) {
       $(this).attr({class: 'move-scale', stroke: "#999", fill: "#666"});
     }).promise().done(function(){
-      $thisLine.attr({class: 'deletable move-scale', stroke: "red"})
+      $thisLine.attr({class: 'deletable move-scale', stroke: "#AA3018"})
         .appendTo('#drawing');
-      $dragHandle.attr({class: 'deletable', fill: 'red'})
+      $dragHandle.attr({class: 'deletable', fill: '#AA3018'})
         .appendTo('#drawing');
-      $moveHandle.attr({class: 'deletable', fill: 'red'})
+      $moveHandle.attr({class: 'deletable', fill: '#AA3018'})
+        .appendTo('#drawing');
+      $dragHandle2.attr({class: 'deletable', fill: '#AA3018'})
         .appendTo('#drawing');
     });
   });

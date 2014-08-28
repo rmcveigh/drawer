@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Snap.svg Test 1</title>
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,600,800,300' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/smoothness/jquery-ui.css" />
   <link rel="stylesheet" href="styles/testone.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -10,26 +11,32 @@
   <script src="/js/contrib/snap.svg-min.js"></script>
 </head>
 <body>
-  <header>
+  <header class="clearfix">
+    <a href="javascript:void(0)" id="logo-link" class="logo"><img src="/images/logo.png" alt="logo"/></a>
+    <h1 class="project-title">Project Title</h1>
     <div id="user-settings">
-    <h2>User Settings</h2>
     <form action="#" id="user-form">
-      L<input type="number" id="drawer-depth" value="12.5" step="any" name="drawer-depth" min="1"> inches, W<input type="number" id="drawer-width" value="11.0" step="any" name="drawer-width" min="1"> inches, H<input type="number" id="drawer-height" value="4" step="any" name="drawer-height" min="0.5"> inches
-      <br>
-      <button type="submit" id="submit-btn">Submit</button>
+      <fieldset>
+        <label for="drawer-depth">L<input type="number" id="drawer-depth" value="12.5" step="any" name="drawer-depth" min="1">"</label>
+        <label for="drawer-width">W<input type="number" id="drawer-width" value="11.0" step="any" name="drawer-width" min="1">"</label>
+        <label for="drawer-height">H<input type="number" id="drawer-height" value="4" step="any" name="drawer-height" min="0.5">"</label>
+        <button type="submit" id="submit-btn">Apply</button>
+      </fieldset>
     </form>
   </div>
   <nav>
     <ul>
       <li><a href="javascript:void(0)" id="admin-form-link" class="closed tab">Admin Form</a></li>
-      <li><a href="javascript:void(0)" id="template-link" class="closed tab">Load Template</a></li>
-      <li><a href="javascript:void(0)" id="get-quote">Review &amp; Buy</a></li>
-      <li><a href="javascript:void(0)" id="save-page">Save Design</a></li>
+      <li class="tab-gray"><a href="javascript:void(0)" id="template-link" class="closed tab">Load Template</a></li>
+      <li class="tab-blue"><a href="javascript:void(0)" id="get-quote" class="">Review &amp; Buy</a></li>
+      <li class="tab-green"><a href="javascript:void(0)" id="save-page" class="">Save</a></li>
     </ul>
   </nav>
   </header>
   <div id="admin-settings" class="admin-form-link">
-    <a href="javascript:void(0)" id="close-admin-form" class="close-btn">close</a>
+    <div class="close-wrapper">
+      <a href="javascript:void(0)" id="close-admin-form" class="close-btn">close</a>
+    </div>
     <form action="#" id="admin-form">
       Material Thickness:  <input type="number" id="material-thickness" value="0.22" step="any" name="thickness" min="0"> inches
       <br>
@@ -64,7 +71,9 @@
   </div>
 
   <div id="templates" class="template-link">
-    <a href="javascript:void(0)" id="close-templates" class="close-btn">close</a>
+    <div class="close-wrapper">
+      <a href="javascript:void(0)" id="close-templates" class="close-btn">close</a>
+    </div>
     <ul>
       <li>
         <a href="javascript:void(0)" id="item1" class="template-image-link"><img class="template-image" src="images/kcup.png"></a>
@@ -80,17 +89,22 @@
       </li>
     </ul>
   </div>
-
-  <div id="drawing-tools">
-    <h3>Tools</h3>
-    Draw Horizontal Line: <button id="horizontal-line">-</button>&nbsp;&nbsp;&nbsp;
-    Draw Vertical Line: <button id="vertical-line">|</button>&nbsp;&nbsp;&nbsp;
-    <a class="btn btn-blue visable" id="preview-link" href="javascript:void(0)">Preview</a>&nbsp;&nbsp;&nbsp;
-    <a class="btn btn-blue" id="delete-line" href="javascript:void(0)">Delete Line</a>&nbsp;&nbsp;&nbsp;
-    <a class="btn btn-blue" id="clear-btn" href="javascript:void(0)">Clear All</a>
-  </div>
-  <div id="svg-drawing">
-    <svg id="drawing"></svg>
+  <div class="content">
+    <div class="tool-links clearfix">
+      <span class="preview-link-wrapper"><a class="btn btn-blue visable" id="preview-link" href="javascript:void(0)">Preview</a></span>
+      <span class="delete-link-wrapper"><a class="btn btn-blue" id="delete-line" href="javascript:void(0)">Delete Line</a></span>
+      <span class="clear-link-wrapper"><a class="btn btn-blue" id="clear-btn" href="javascript:void(0)">Clear All</a></span>
+    </div>
+    <aside>
+      <div id="drawing-tools">
+        <button id="vertical-line" class="btn-green"><b>Add</b><br>Verticle <br>Line</button>
+        <br>
+        <button id="horizontal-line" class="btn-green"><b>Add</b><br>Horizontal <br> Line</button>
+      </div>
+    </aside>
+    <div id="svg-drawing">
+      <svg id="drawing"></svg>
+    </div>
   </div>
   <div id="template-change-dialog" title="How would you like to add this template?">
     <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Would you like this template to fit into or placed above/within your current drawer?</p>
