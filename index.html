@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Snap.svg Test 1</title>
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,600,800,300' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/smoothness/jquery-ui.css" />
+  <link rel="stylesheet" href="styles/testone.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
+  <script src="/js/contrib/snap.svg-min.js"></script>
+</head>
+<body>
+  <header class="clearfix">
+    <a href="javascript:void(0)" id="logo-link" class="logo"><img src="/images/logo.png" alt="logo"/></a>
+    <h1 class="project-title">Project Title</h1>
+    <div id="user-settings">
+    <form action="#" id="user-form">
+      <fieldset>
+        <label for="drawer-depth">L<input type="number" id="drawer-depth" value="12.5" step="any" name="drawer-depth" min="1">"</label>
+        <label for="drawer-width">W<input type="number" id="drawer-width" value="11.0" step="any" name="drawer-width" min="1">"</label>
+        <label for="drawer-height">H<input type="number" id="drawer-height" value="4" step="any" name="drawer-height" min="0.5">"</label>
+        <button type="submit" id="submit-btn">Apply</button>
+      </fieldset>
+    </form>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="javascript:void(0)" id="admin-form-link" class="closed tab">Admin Form</a></li>
+      <li class="tab-gray"><a href="javascript:void(0)" id="template-link" class="closed tab">Load Template</a></li>
+      <li class="tab-blue"><a href="javascript:void(0)" id="get-quote" class="">Review &amp; Buy</a></li>
+      <li class="tab-green"><a href="javascript:void(0)" id="save-page" class="">Save</a></li>
+    </ul>
+  </nav>
+  </header>
+  <div id="admin-settings" class="admin-form-link">
+    <div class="close-wrapper">
+      <a href="javascript:void(0)" id="close-admin-form" class="close-btn">close</a>
+    </div>
+    <form action="#" id="admin-form">
+      Material Thickness:  <input type="number" id="material-thickness" value="0.22" step="any" name="thickness" min="0"> inches
+      <br>
+      Overlap joint clearance:  <input type="number" id="overlap-clearance" value="0.0625" step="any" name="overlap-clearance" min="0"> inches
+      <br>
+      Kerf clearance:  <input type="number" id="kerf-clearance" value="0.006" step="any" name="kerf-clearance" min="0"> inches
+      <br>
+      Grid units:  <input type="number" id="grid-units" value="4" step="any" name="grid-units" min="0"> inches
+      <br>
+      <h3>Product Price Parameters</h3>
+      Product Price: $<input type="number" id="price-per-inch" value="0.05" step="any" name="price-per-inch" min="0"> USD per square inch
+      <br>
+      Product base price: $<input type="number" id="product-base-price" value="1.00" step="any" name="product-base-price" min="0"> USD
+      <br>
+      <h3>Shipping Price Parameters</h3>
+      Shipping price: $<input type="number" id="price-per-pound" value="1.00" step="any" name="price-per-pound" min="0"> USD per pound
+      <br>
+      Shipping base price: $<input type="number" id="shipping-base-price" value="10.00" step="any" name="shipping-base-price" min="0"> USD
+      <br>
+      Weight: <input type="number" id="weight-per-inch" value="0.01" step="any" name="weight-per-inch" min="0"> lbs per square inch
+      <br>
+      <h3>Max drawer dimensions</h3>
+      height:  <input type="number" id="max-height" value="4" step="any" name="max-height" min="0"> inches, width:  <input type="number" id="max-width" value="38" step="any" name="max-width" min="0"> inches, depth:  <input type="number" id="max-depth" value="24" step="any" name="max-depth" min="0"> inches
+      <br>
+      <h3>Min drawer dimensions</h3>
+      height:  <input type="number" id="min-height" value="1" step="any" name="min-height" min="0"> inches, width:  <input type="number" id="min-width" value="3" step="any" name="min-width" min="0"> inches, depth:  <input type="number" id="min-depth" value="3" step="any" name="min-depth" min="0"> inches
+      <br>
+      Min segment length:  <input type="number" id="min-segment-length" value="0.5" step="any" name="min-segment-length" min="0"> inches
+      <br>
+      <button type="submit" id="submit-btn">Submit</button>
+    </form>
+  </div>
+
+  <div id="templates" class="template-link">
+    <div class="close-wrapper">
+      <a href="javascript:void(0)" id="close-templates" class="close-btn">close</a>
+    </div>
+    <ul>
+      <li>
+        <a href="javascript:void(0)" id="item1" class="template-image-link"><img class="template-image" src="images/kcup.png"></a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" id="item2" class="template-image-link"><img class="template-image" src="images/item2.png"></a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" id="item3" class="template-image-link"><img class="template-image" src="images/item3.png"></a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" id="item4" class="template-image-link"><img class="template-image" src="images/item4.png"></a>
+      </li>
+    </ul>
+  </div>
+  <div class="content">
+    <div class="tool-links clearfix">
+      <span class="preview-link-wrapper"><a class="btn btn-blue visable" id="preview-link" href="javascript:void(0)">Preview</a></span>
+      <span class="delete-link-wrapper"><a class="btn btn-blue" id="delete-line" href="javascript:void(0)">Delete Line</a></span>
+      <span class="clear-link-wrapper"><a class="btn btn-blue" id="clear-btn" href="javascript:void(0)">Clear All</a></span>
+    </div>
+    <aside>
+      <div id="drawing-tools">
+        <button id="vertical-line" class="btn-green"><b>Add</b><br>Verticle <br>Line</button>
+        <br>
+        <button id="horizontal-line" class="btn-green"><b>Add</b><br>Horizontal <br> Line</button>
+      </div>
+    </aside>
+    <div id="svg-drawing">
+      <svg id="drawing"></svg>
+    </div>
+  </div>
+  <div id="template-change-dialog" title="How would you like to add this template?">
+    <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Would you like this template to fit into or placed above/within your current drawer?</p>
+  </div>
+  <div id="clear-canvas-dialog" title="Clear All?">
+    <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Are you sure you would like to clear the entire canvas?</p>
+  </div>
+  <div id="delete-line-dialog" title="Delete Line?">
+    <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Are you sure you would like to delete that line?</p>
+  </div>
+  <script src="js/custom/testone.js"></script>
+</body>
+</html>
